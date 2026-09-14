@@ -39,6 +39,10 @@ st.markdown(
       h1 { color:#f7faff; font-size:clamp(2rem,4vw,3.2rem) !important; letter-spacing:-.06em; margin:.2rem 0 .6rem !important; }
       h2, h3 { color:#f7faff; letter-spacing:-.03em; }
       .hero-copy { color:#a9b6cb; font-size:15px; line-height:1.75; }
+      .sample-header { border:2px solid #d92bff; border-radius:19px; padding:20px 26px 19px; text-align:center; background:linear-gradient(145deg,#171a28,#0e1420); box-shadow:0 0 30px rgba(217,43,255,.20); margin:0 auto 14px; max-width:920px; }
+      .sample-header-title { color:#f9fbff; font-size:32px; font-weight:800; letter-spacing:-.04em; }
+      .sample-header-sub { color:#1fe4ef; font-size:12px; font-weight:800; letter-spacing:.12em; margin-top:8px; }
+      .sample-header-kh { color:#c7d2e4; font-size:13px; margin-top:10px; }
       .step-card { background:linear-gradient(135deg,#151d2f,#101625); border:1px solid #29364e; border-radius:18px; padding:22px; min-height:120px; }
       .step-num { display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border-radius:9px; background:var(--cyan); color:#0b0f18; font-weight:800; margin-bottom:14px; }
       .step-card h3 { font-size:18px; margin:0 0 6px; }
@@ -153,14 +157,12 @@ def main() -> None:
         st.radio("Voice mode", ["Auto", "All Male", "All Female"], label_visibility="collapsed")
         st.selectbox("AI model", ["Gemini Flash", "Gemini Pro", "OpenAI GPT"], label_visibility="collapsed")
 
-    st.markdown('<div class="eyebrow">AI KHEMRA BRO · Your Khmer-first studio</div>', unsafe_allow_html=True)
-    st.title("AI Dubbing & Subtitling\nWorkstation")
-    st.markdown('<p class="hero-copy">បង្កើត subtitle បកប្រែ និងសំឡេង dubbing ក្នុង workspace តែមួយ។ រក្សាឈ្មោះ **AI KHEMRA BRO** ជា branding របស់អ្នក។</p>', unsafe_allow_html=True)
+    st.markdown('<div class="sample-header"><div class="sample-header-title">AI KHEMRA BRO</div><div class="sample-header-sub">GLOBAL KHMER AI DUBBING WORKSTATION</div><div class="sample-header-kh">បកប្រែ subtitle និងបង្កើតសំឡេងខ្មែរ ក្នុងកម្មវិធីតែមួយ</div></div>', unsafe_allow_html=True)
 
     tabs = st.tabs(["🎬 AI Video Dubbing", "🌐 AI SRT Translator", "📜 Subtitle to Speech", "🎙️ Text-to-Speech"])
 
     with tabs[0]:
-        st.markdown("## 1. Generate Subtitles from Video")
+        st.markdown("## 1. Generate Subtitles (ខ្មែរ)")
         video = st.file_uploader("Upload video", type=["mp4", "mov", "avi", "mkv"], key="video_upload")
         if video:
             st.success(f"បាន upload: {video.name} · {video.size / 1024 / 1024:.1f} MB")
@@ -172,7 +174,7 @@ def main() -> None:
         with c2:
             if st.button("🗑️ Clear video project", use_container_width=True):
                 st.rerun()
-        st.markdown("## 2. AI Dubbing")
+        st.markdown("## 2. AI Dubbing (Khmer Voice Studio)")
         st.info("Upload a video or paste SRT, then connect TTS to generate Khmer dubbed audio.")
 
     with tabs[1]:
