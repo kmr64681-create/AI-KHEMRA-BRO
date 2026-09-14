@@ -145,7 +145,8 @@ def main() -> None:
     with st.sidebar:
         st.markdown('<div class="brand-card"><div class="brand-mark">ខ</div><div class="brand-name">AI KHEMRA BRO</div><div class="brand-sub">GLOBAL AI DUBBING & SUBTITLING</div></div>', unsafe_allow_html=True)
         st.markdown('<div class="profile-card"><div class="profile-name">👋 AI KHEMRA BRO</div><div style="color:#a9b6cb;font-size:12px;margin-top:7px">ROLE: CREATOR</div><div style="color:#a9b6cb;font-size:12px">STATUS: ACTIVE WORKSPACE</div></div>', unsafe_allow_html=True)
-        st.button("🚪 Logout", use_container_width=True)
+        if st.button("🚪 Logout", use_container_width=True):
+            st.info("នេះជាកម្មវិធី demo ដោយមិនទាន់មាន account session។")
         st.markdown("### 🎯 Target Language")
         st.selectbox("Target language", ["Khmer (ខ្មែរ)", "English", "Thai", "Vietnamese"], label_visibility="collapsed")
         st.markdown("### 🔑 AI Settings")
@@ -203,7 +204,7 @@ def main() -> None:
         st.progress(translated / len(lines) if lines else 0)
         st.markdown(f'<span class="status-pill">{st.session_state.file_name}</span>', unsafe_allow_html=True)
 
-        c1, c2, c3, c4 = st.columns(4)
+        c1, c2, c3, c4, c5 = st.columns(5)
         with c1:
             if st.button("✨ Translate whole story", type="primary", use_container_width=True):
                 st.warning("ប៊ូតុងរួចរាល់សម្រាប់ភ្ជាប់ AI translation API។ បច្ចុប្បន្ន អ្នកអាចកែសម្រួលបន្ទាត់ខ្មែរដោយដៃ។")
@@ -219,6 +220,11 @@ def main() -> None:
             if st.button("↺ Reset", use_container_width=True):
                 load_demo()
                 st.rerun()
+        with c5:
+            if st.button("⌫ Clear", use_container_width=True):
+                for line in lines:
+                    line["target"] = ""
+                st.success("បានលុបការបកប្រែខ្មែរទាំងអស់។")
 
         st.markdown("### Review and edit Khmer translation")
         for index, line in enumerate(lines):
