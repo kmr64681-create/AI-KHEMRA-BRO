@@ -179,12 +179,12 @@ def main() -> None:
 
     with st.sidebar:
         st.markdown('<div class="brand-card"><div class="brand-mark">ខ</div><div class="brand-name">AI KHEMRA BRO</div><div class="brand-sub">GLOBAL AI DUBBING & SUBTITLING</div></div>', unsafe_allow_html=True)
-        st.markdown('<div class="profile-card"><div class="profile-name">👋 AI KHEMRA BRO</div><div style="color:#a9b6cb;font-size:12px;margin-top:7px">ROLE: CREATOR</div><div style="color:#a9b6cb;font-size:12px">PLAN: COMMUNITY</div><div style="color:#a9b6cb;font-size:12px">STATUS: ACTIVE WORKSPACE</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="profile-card"><div class="profile-name">👋 AI KHEMRA BRO</div><div style="color:#a9b6cb;font-size:12px;margin-top:7px">ROLE: CREATOR</div><div style="color:#a9b6cb;font-size:12px">PLAN: COMMUNITY</div><div style="color:#a9b6cb;font-size:12px">ACCESS: ACTIVE WORKSPACE</div><div style="color:#20d9ed;font-size:12px;font-weight:700;margin-top:5px">289 DAYS LEFT</div></div>', unsafe_allow_html=True)
         if st.button("🚪 Logout", use_container_width=True):
             st.info("នេះជាកម្មវិធី demo ដោយមិនទាន់មាន account session។")
-        st.markdown("### 🎯 Target Language")
+        st.markdown("### 🎯 Target Language (ភាសាគោលដៅ)")
         st.selectbox("Target language", ["Khmer (ខ្មែរ)", "English", "Thai", "Vietnamese"], label_visibility="collapsed")
-        st.markdown("### 🔑 AI Settings")
+        st.markdown("### 🔑 API Keys Manager")
         st.text_area("Gemini API keys", placeholder="Paste Gemini API keys here (one per line)", height=95, label_visibility="collapsed", key="gemini_api_keys")
         st.caption("API keys are only used for the current session.")
         st.markdown("### 🌐 Google Translation API")
