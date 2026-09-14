@@ -47,6 +47,8 @@ st.markdown(
       .sample-header-title { color:#f9fbff; font-size:32px; font-weight:800; letter-spacing:-.04em; }
       .sample-header-sub { color:#1fe4ef; font-size:12px; font-weight:800; letter-spacing:.12em; margin-top:8px; }
       .sample-header-kh { color:#c7d2e4; font-size:13px; margin-top:10px; }
+      .social-row { display:flex; justify-content:center; gap:10px; margin-top:14px; }
+      .social-row a { color:#06111d; background:#20d9ed; border-radius:7px; padding:7px 15px; font-weight:700; font-size:12px; text-decoration:none; }
       .step-card { background:linear-gradient(135deg,#151d2f,#101625); border:1px solid #29364e; border-radius:18px; padding:22px; min-height:120px; }
       .step-num { display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border-radius:9px; background:var(--cyan); color:#0b0f18; font-weight:800; margin-bottom:14px; }
       .step-card h3 { font-size:18px; margin:0 0 6px; }
@@ -177,13 +179,13 @@ def main() -> None:
 
     with st.sidebar:
         st.markdown('<div class="brand-card"><div class="brand-mark">ខ</div><div class="brand-name">AI KHEMRA BRO</div><div class="brand-sub">GLOBAL AI DUBBING & SUBTITLING</div></div>', unsafe_allow_html=True)
-        st.markdown('<div class="profile-card"><div class="profile-name">👋 AI KHEMRA BRO</div><div style="color:#a9b6cb;font-size:12px;margin-top:7px">ROLE: CREATOR</div><div style="color:#a9b6cb;font-size:12px">STATUS: ACTIVE WORKSPACE</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="profile-card"><div class="profile-name">👋 AI KHEMRA BRO</div><div style="color:#a9b6cb;font-size:12px;margin-top:7px">ROLE: CREATOR</div><div style="color:#a9b6cb;font-size:12px">PLAN: COMMUNITY</div><div style="color:#a9b6cb;font-size:12px">STATUS: ACTIVE WORKSPACE</div></div>', unsafe_allow_html=True)
         if st.button("🚪 Logout", use_container_width=True):
             st.info("នេះជាកម្មវិធី demo ដោយមិនទាន់មាន account session។")
         st.markdown("### 🎯 Target Language")
         st.selectbox("Target language", ["Khmer (ខ្មែរ)", "English", "Thai", "Vietnamese"], label_visibility="collapsed")
         st.markdown("### 🔑 AI Settings")
-        st.text_area("API keys", placeholder="Paste API keys here (one per line)", height=95, label_visibility="collapsed")
+        st.text_area("Gemini API keys", placeholder="Paste Gemini API keys here (one per line)", height=95, label_visibility="collapsed", key="gemini_api_keys")
         st.caption("API keys are only used for the current session.")
         st.markdown("### 🌐 Google Translation API")
         google_api_key = st.text_input("Google API key", type="password", placeholder="AIza…", key="google_translation_api_key")
@@ -202,7 +204,7 @@ def main() -> None:
         st.radio("Voice mode", ["Auto", "All Male", "All Female"], label_visibility="collapsed")
         st.selectbox("AI model", ["Gemini Flash", "Gemini Pro", "OpenAI GPT"], label_visibility="collapsed")
 
-    st.markdown('<div class="sample-header"><div class="sample-header-title">AI KHEMRA BRO</div><div class="sample-header-sub">GLOBAL KHMER AI DUBBING WORKSTATION</div><div class="sample-header-kh">បកប្រែ subtitle និងបង្កើតសំឡេងខ្មែរ ក្នុងកម្មវិធីតែមួយ</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="sample-header"><div class="sample-header-title">AI KHEMRA BRO</div><div class="sample-header-sub">GLOBAL KHMER AI DUBBING WORKSTATION</div><div class="sample-header-kh">បកប្រែ subtitle និងបង្កើតសំឡេងខ្មែរ ក្នុងកម្មវិធីតែមួយ</div><div class="social-row"><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO" target="_blank">💻 GitHub</a><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO/issues" target="_blank">🛠️ Support</a></div></div>', unsafe_allow_html=True)
 
     tabs = st.tabs(["🎬 AI Video Dubbing", "🌐 AI SRT Translator", "📜 Subtitle to Speech", "🎙️ Text-to-Speech"])
 
