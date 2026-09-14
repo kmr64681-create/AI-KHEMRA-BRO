@@ -39,3 +39,16 @@
 ---
 
 > Built with curiosity, code, and a Khmer-first mindset.
+
+## Run the application
+
+This repository includes a usable Streamlit interface with a home page, project information, and a Subtitle Studio for `.srt`, `.ass`, and `.vtt` files.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Then open the local URL shown by Streamlit in your browser.
