@@ -42,7 +42,7 @@
 
 ## Run the application
 
-This repository includes a usable Streamlit interface with a home page, project information, and a Subtitle Studio for `.srt`, `.ass`, and `.vtt` files.
+This repository includes a usable Streamlit interface with the AI KHEMRA BRO branding, a dark dubbing-workstation layout, sidebar settings, and tabs for AI Video Dubbing, AI SRT Translator, Subtitle to Speech, and Text-to-Speech. The subtitle workflow supports `.srt`, `.ass`, and `.vtt` files.
 
 ```bash
 python -m venv .venv

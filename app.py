@@ -14,7 +14,7 @@ class SubtitleLine(TypedDict):
 
 
 st.set_page_config(
-    page_title="AI KHEMRA BRO",
+    page_title="AI KHEMRA BRO · AI Dubbing Workstation",
     page_icon="ខ",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -24,40 +24,40 @@ st.markdown(
     """
     <style>
       @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap');
-      :root { --navy: #17243b; --coral: #ef7e57; --paper: #f7f2ea; }
+      :root { --navy: #0b0f18; --panel: #121827; --line: #263147; --cyan: #29d9f2; --pink: #ff20e7; --lime: #ccff42; }
       html, body, [class*="css"] { font-family: 'DM Sans', 'Noto Sans Khmer', sans-serif; }
-      .stApp { background: var(--paper); color: var(--navy); }
-      [data-testid="stSidebar"] { background: var(--navy); }
-      [data-testid="stSidebar"] * { color: #f9f6f0; }
-      .brand { display:flex; align-items:center; gap:14px; margin: 8px 0 28px; }
-      .brand-mark { display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:16px; background:var(--coral); color:white; font-size:25px; font-weight:700; }
-      .brand-title { font-size:20px; font-weight:700; letter-spacing:-.03em; }
-      .eyebrow { color:#9a745f; font-size:11px; font-weight:700; letter-spacing:.17em; text-transform:uppercase; }
-      h1 { color:var(--navy); font-size:clamp(2.2rem, 5vw, 4.3rem) !important; line-height:1.02 !important; letter-spacing:-.06em; margin:.35rem 0 .75rem !important; }
-      h2, h3 { color:var(--navy); letter-spacing:-.03em; }
-      .hero-copy { color:#68758a; font-size:16px; line-height:1.8; max-width:690px; }
-      .stat { background:#fffdf9; border:1px solid #ded8ce; border-radius:18px; padding:15px 18px; text-align:center; }
-      .stat-label { color:#929aa6; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
-      .stat-value { color:var(--navy); font-size:28px; font-weight:700; }
-      .panel { background:#fffdf9; border:1px solid #ded8ce; border-radius:22px; padding:24px; box-shadow:0 12px 34px rgba(59,47,34,.06); }
-      .dark-panel { background:var(--navy); border-radius:22px; padding:24px; color:white; }
-      .dark-panel h3, .dark-panel p { color:white; }
-      .line-card { background:#fffdf9; border:1px solid #ebe3d8; border-radius:14px; padding:15px; margin:10px 0; }
-      .time { color:#929aa6; font-family:monospace; font-size:12px; }
-      .source { color:#33435b; font-size:15px; margin-top:7px; }
-      .format-pill { display:inline-block; border-radius:999px; padding:4px 9px; background:#f1eee8; color:#8f8d88; font-size:10px; font-weight:700; letter-spacing:.12em; }
-      .stButton > button { border-radius:12px; font-weight:600; }
-      .stButton > button[kind="primary"] { background:var(--coral); border-color:var(--coral); }
-      .stProgress > div > div > div > div { background:var(--coral); }
+      .stApp { background:var(--navy); color:#f4f7ff; }
+      [data-testid="stSidebar"] { background:#111827; border-right:1px solid #263147; }
+      [data-testid="stSidebar"] * { color:#f4f7ff; }
+      .brand-card { border:1px solid #e020ff; border-radius:18px; padding:22px 16px; text-align:center; background:linear-gradient(145deg,#171a28,#0f1422); box-shadow:0 0 24px rgba(224,32,255,.22); margin:6px 0 18px; }
+      .brand-mark { display:inline-flex; align-items:center; justify-content:center; width:50px; height:50px; border-radius:15px; background:linear-gradient(135deg,#ff22ea,#7b35ff); color:white; font-size:26px; font-weight:700; margin-bottom:10px; }
+      .brand-name { color:white; font-size:22px; font-weight:700; letter-spacing:-.04em; }
+      .brand-sub { color:#20e1f3; font-size:11px; font-weight:700; letter-spacing:.09em; margin-top:10px; }
+      .profile-card { border:1px solid #1dd5ef; border-radius:15px; padding:14px; background:#101927; margin:14px 0 20px; }
+      .profile-name { color:#f4f7ff; font-weight:700; }
+      .eyebrow { color:var(--cyan); font-size:11px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; }
+      h1 { color:#f7faff; font-size:clamp(2rem,4vw,3.2rem) !important; letter-spacing:-.06em; margin:.2rem 0 .6rem !important; }
+      h2, h3 { color:#f7faff; letter-spacing:-.03em; }
+      .hero-copy { color:#a9b6cb; font-size:15px; line-height:1.75; }
+      .step-card { background:linear-gradient(135deg,#151d2f,#101625); border:1px solid #29364e; border-radius:18px; padding:22px; min-height:120px; }
+      .step-num { display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border-radius:9px; background:var(--cyan); color:#0b0f18; font-weight:800; margin-bottom:14px; }
+      .step-card h3 { font-size:18px; margin:0 0 6px; }
+      .step-card p { color:#9eacc0; font-size:13px; margin:0; line-height:1.55; }
+      .dark-panel { background:linear-gradient(140deg,#171e31,#111722); border:1px solid #263147; border-radius:18px; padding:22px; }
+      .status-pill { border:1px solid #4b5a73; background:#172236; color:#c7d2e4; border-radius:999px; padding:5px 10px; font-size:11px; font-weight:700; }
+      .stTabs [data-baseweb="tab-list"] { gap:8px; border-bottom:1px solid #29354a; }
+      .stTabs [data-baseweb="tab"] { color:#9dacbf; padding:12px 16px; }
+      .stTabs [aria-selected="true"] { color:var(--cyan); border-bottom-color:var(--cyan); }
+      .stButton > button, .stDownloadButton > button { border-radius:10px; font-weight:700; background:#1b2740; border:1px solid #35445d; color:#f4f7ff; }
+      .stButton > button[kind="primary"] { background:linear-gradient(90deg,#ff1edf,#7e37ff); border-color:#ff1edf; color:white; }
+      .stProgress > div > div > div > div { background:var(--cyan); }
+      [data-testid="stFileUploader"] { background:#121a29; border:1px dashed #35506f; border-radius:15px; padding:10px; }
+      textarea, input { background:#111a2a !important; color:#f4f7ff !important; }
+      .stAlert { background:#172236; }
     </style>
     """,
     unsafe_allow_html=True,
 )
-
-
-def format_from_name(name: str) -> str | None:
-    extension = Path(name).suffix.lower().lstrip(".")
-    return extension if extension in {"srt", "ass", "vtt"} else None
 
 
 def make_line(index: int, start: str, end: str, source: str) -> SubtitleLine:
@@ -128,119 +128,121 @@ def demo_lines() -> list[SubtitleLine]:
     return parse_srt("1\n00:00:02,000 --> 00:00:04,700\n你终于来了。\n\n2\n00:00:05,200 --> 00:00:08,000\n我等你很久了。\n\n3\n00:00:08,600 --> 00:00:12,000\n今晚的月亮，真的很漂亮。")
 
 
-def show_translation_notice(message: str, kind: str = "info") -> None:
-    if kind == "success":
-        st.success(message)
-    elif kind == "warning":
-        st.warning(message)
-    else:
-        st.info(message)
+def load_demo() -> None:
+    st.session_state.lines = demo_lines()
+    st.session_state.file_name = "demo-scene.srt"
+    st.session_state.format = "srt"
 
 
 def main() -> None:
+    if "lines" not in st.session_state:
+        load_demo()
+
     with st.sidebar:
-        st.markdown('<div class="brand"><div class="brand-mark">ខ</div><div class="brand-title">AI KHEMRA BRO</div></div>', unsafe_allow_html=True)
-        st.caption("Khmer-first AI workspace")
-        page = st.radio("Menu", ["Home", "Subtitle Studio", "About"], label_visibility="collapsed")
-        st.divider()
-        st.caption("ភាសា / Language")
-        st.selectbox("Language", ["ខ្មែរ + English", "ខ្មែរ", "English"], label_visibility="collapsed")
+        st.markdown('<div class="brand-card"><div class="brand-mark">ខ</div><div class="brand-name">AI KHEMRA BRO</div><div class="brand-sub">GLOBAL AI DUBBING & SUBTITLING</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="profile-card"><div class="profile-name">👋 AI KHEMRA BRO</div><div style="color:#a9b6cb;font-size:12px;margin-top:7px">ROLE: CREATOR</div><div style="color:#a9b6cb;font-size:12px">STATUS: ACTIVE WORKSPACE</div></div>', unsafe_allow_html=True)
+        st.button("🚪 Logout", use_container_width=True)
+        st.markdown("### 🎯 Target Language")
+        st.selectbox("Target language", ["Khmer (ខ្មែរ)", "English", "Thai", "Vietnamese"], label_visibility="collapsed")
+        st.markdown("### 🔑 AI Settings")
+        st.text_area("API keys", placeholder="Paste API keys here (one per line)", height=95, label_visibility="collapsed")
+        st.caption("API keys are only used for the current session.")
+        st.markdown("### 🎚️ Translation Style")
+        st.radio("Translation style", ["Natural movie dialogue", "Literal translation", "Formal Khmer"], label_visibility="collapsed")
+        st.markdown("### ⚙️ Voice Settings")
+        st.radio("Voice mode", ["Auto", "All Male", "All Female"], label_visibility="collapsed")
+        st.selectbox("AI model", ["Gemini Flash", "Gemini Pro", "OpenAI GPT"], label_visibility="collapsed")
 
-    if page == "Home":
-        st.markdown('<div class="eyebrow">AI KHEMRA BRO · Khmer-first workspace</div>', unsafe_allow_html=True)
-        st.title("Build useful AI tools\nfor Khmer people.")
-        st.markdown('<p class="hero-copy">ស្វាគមន៍មកកាន់ AI KHEMRA BRO — កន្លែងសម្រាប់បង្កើត និងប្រើប្រាស់ឧបករណ៍ AI ដែលងាយស្រួល សាមញ្ញ និងគាំទ្រភាសាខ្មែរ។</p>', unsafe_allow_html=True)
-        st.write("")
-        left, right = st.columns([1.5, 1], gap="large")
-        with left:
-            st.markdown('<div class="panel"><div class="eyebrow">What we build</div><h2>Technology that feels closer to home.</h2><p>AI tools, translation workflows, automation, and web experiences designed with Khmer users in mind.</p></div>', unsafe_allow_html=True)
-        with right:
-            st.markdown('<div class="dark-panel"><h3>Start here</h3><p>បើក Subtitle Studio ដើម្បីកែសម្រួល និងបកប្រែ subtitle ជាមួយ UI ដែលងាយប្រើ។</p></div>', unsafe_allow_html=True)
-        st.write("")
-        a, b, c = st.columns(3)
-        for col, label, value in zip((a, b, c), ("Focus", "Languages", "Tools"), ("Khmer-first", "ខ្មែរ · English", "AI + Web")):
-            with col:
-                st.markdown(f'<div class="stat"><div class="stat-label">{label}</div><div class="stat-value">{value}</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="eyebrow">AI KHEMRA BRO · Your Khmer-first studio</div>', unsafe_allow_html=True)
+    st.title("AI Dubbing & Subtitling\nWorkstation")
+    st.markdown('<p class="hero-copy">បង្កើត subtitle បកប្រែ និងសំឡេង dubbing ក្នុង workspace តែមួយ។ រក្សាឈ្មោះ **AI KHEMRA BRO** ជា branding របស់អ្នក។</p>', unsafe_allow_html=True)
 
-    elif page == "Subtitle Studio":
-        st.markdown('<div class="eyebrow">Workspace / Subtitle Studio</div>', unsafe_allow_html=True)
-        st.title("Make every line\nfeel natural.")
-        st.markdown('<p class="hero-copy">បកប្រែ និងកែសម្រួល subtitle ចិនទៅខ្មែរ ជាមួយការគាំទ្រ .srt, .ass និង .vtt។</p>', unsafe_allow_html=True)
-        uploaded = st.file_uploader("Drop a subtitle file here", type=["srt", "ass", "vtt"], label_visibility="visible")
-        if uploaded is not None:
-            fmt = format_from_name(uploaded.name)
+    tabs = st.tabs(["🎬 AI Video Dubbing", "🌐 AI SRT Translator", "📜 Subtitle to Speech", "🎙️ Text-to-Speech"])
+
+    with tabs[0]:
+        st.markdown("## 1. Generate Subtitles from Video")
+        video = st.file_uploader("Upload video", type=["mp4", "mov", "avi", "mkv"], key="video_upload")
+        if video:
+            st.success(f"បាន upload: {video.name} · {video.size / 1024 / 1024:.1f} MB")
+        st.text_area("Generated SRT from video", placeholder="Generated subtitle text will appear here after connecting a transcription model…", height=170)
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("✨ Generate subtitles", type="primary", use_container_width=True):
+                st.info("Video transcription UI is ready. Connect a speech-to-text model to generate timestamps automatically.")
+        with c2:
+            if st.button("🗑️ Clear video project", use_container_width=True):
+                st.rerun()
+        st.markdown("## 2. AI Dubbing")
+        st.info("Upload a video or paste SRT, then connect TTS to generate Khmer dubbed audio.")
+
+    with tabs[1]:
+        st.markdown("## AI SRT Translator")
+        st.caption("Upload subtitle → review original text → translate into Khmer → download.")
+        uploaded = st.file_uploader("Upload .srt, .ass, or .vtt", type=["srt", "ass", "vtt"], key="subtitle_upload")
+        if uploaded:
+            fmt = Path(uploaded.name).suffix.lower().lstrip(".")
             text = uploaded.getvalue().decode("utf-8-sig", errors="replace")
-            st.session_state.lines = parse_subtitle(text, fmt or "srt")
-            st.session_state.file_name = uploaded.name
-            st.session_state.format = fmt or "srt"
-        if "lines" not in st.session_state:
-            st.session_state.lines = demo_lines()
-            st.session_state.file_name = "demo-scene.srt"
-            st.session_state.format = "srt"
+            parsed = parse_subtitle(text, fmt)
+            if parsed:
+                st.session_state.lines = parsed
+                st.session_state.file_name = uploaded.name
+                st.session_state.format = fmt
+                st.success(f"បានផ្ទុក {len(parsed)} បន្ទាត់ · {fmt.upper()}")
+            else:
+                st.error("រកមិនឃើញ subtitle lines ក្នុងឯកសារនេះទេ")
 
         lines = st.session_state.lines
         fmt = st.session_state.format
         translated = sum(1 for line in lines if line["target"].strip())
-        p1, p2, p3 = st.columns(3)
-        with p1:
-            st.metric("Lines", len(lines))
-        with p2:
-            st.metric("Complete", f"{translated}/{len(lines)}")
-        with p3:
-            st.metric("Format", fmt.upper())
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Subtitle lines", len(lines))
+        m2.metric("Translated", f"{translated}/{len(lines)}")
+        m3.metric("Format", fmt.upper())
         st.progress(translated / len(lines) if lines else 0)
+        st.markdown(f'<span class="status-pill">{st.session_state.file_name}</span>', unsafe_allow_html=True)
 
-        st.markdown("### Story translation controls")
-        st.caption("ជ្រើសរើសសកម្មភាពខាងក្រោម ដើម្បីបកប្រែរឿង និងរៀបចំឯកសាររបស់អ្នក។")
-        selected_id = st.selectbox("Selected subtitle line", [line["id"] for line in lines], format_func=lambda value: f"Line {value:02d}")
-        action_col_1, action_col_2 = st.columns(2, gap="medium")
-        with action_col_1:
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
             if st.button("✨ Translate whole story", type="primary", use_container_width=True):
-                show_translation_notice("ប៊ូតុងបកប្រែរឿងទាំងមូលរួចរាល់សម្រាប់ភ្ជាប់ AI translation service។ បច្ចុប្បន្ន អ្នកអាចកែសម្រួលខ្មែរដោយដៃតាមបន្ទាត់ខាងក្រោម។", "warning")
-            if st.button("↗ Translate selected line", use_container_width=True):
-                show_translation_notice(f"បានជ្រើសរើស Line {selected_id:02d}។ វានឹងបកប្រែជាខ្មែរនៅពេលភ្ជាប់ AI service។")
-        with action_col_2:
-            if st.button("↺ Reset demo story", use_container_width=True):
-                st.session_state.lines = demo_lines()
-                st.session_state.file_name = "demo-scene.srt"
-                st.session_state.format = "srt"
-                st.rerun()
-            if st.button("⌫ Clear all Khmer translations", use_container_width=True):
-                for line in lines:
-                    line["target"] = ""
-                show_translation_notice("បានលុបការបកប្រែខ្មែរទាំងអស់ចេញពី workspace។", "success")
-
-        st.markdown("### File actions")
-        controls = st.columns([1, 1, 1.4])
-        with controls[0]:
-            if st.button("Reset demo", use_container_width=True):
-                st.session_state.lines = demo_lines()
-                st.session_state.file_name = "demo-scene.srt"
-                st.session_state.format = "srt"
-                st.rerun()
-        with controls[1]:
-            if st.button("Clear translations", use_container_width=True):
-                for line in lines:
-                    line["target"] = ""
-                st.rerun()
-        with controls[2]:
+                st.warning("ប៊ូតុងរួចរាល់សម្រាប់ភ្ជាប់ AI translation API។ បច្ចុប្បន្ន អ្នកអាចកែសម្រួលបន្ទាត់ខ្មែរដោយដៃ។")
+        with c2:
+            line_ids = [line["id"] for line in lines]
+            selected_id = st.selectbox("Line", line_ids, format_func=lambda value: f"Line {value:02d}", label_visibility="collapsed")
+            if st.button("Translate line", use_container_width=True):
+                st.info(f"Line {selected_id:02d} បានជ្រើសរើសសម្រាប់បកប្រែ។")
+        with c3:
             export = export_subtitle(lines, fmt)
-            st.download_button("Download translated file", export, file_name=f"{Path(st.session_state.file_name).stem}-kh.{fmt}", mime="text/plain", use_container_width=True)
+            st.download_button("⬇️ Download", export, file_name=f"{Path(st.session_state.file_name).stem}-kh.{fmt}", mime="text/plain", use_container_width=True)
+        with c4:
+            if st.button("↺ Reset", use_container_width=True):
+                load_demo()
+                st.rerun()
 
-        st.markdown(f'<div class="panel"><span class="format-pill">{fmt.upper()}</span> <strong>{st.session_state.file_name}</strong><hr/>', unsafe_allow_html=True)
+        st.markdown("### Review and edit Khmer translation")
         for index, line in enumerate(lines):
-            st.markdown('<div class="line-card">', unsafe_allow_html=True)
-            st.markdown(f"<div class='time'>#{line['id']:02d} &nbsp; {line['start']} → {line['end']}</div><div class='source'>{line['source']}</div>", unsafe_allow_html=True)
-            line["target"] = st.text_area("Khmer translation", value=line["target"], key=f"translation_{index}", placeholder="សរសេរការបកប្រែជាភាសាខ្មែរ…")
-            st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            with st.container(border=True):
+                st.caption(f"#{line['id']:02d} · {line['start']} → {line['end']}")
+                st.write(line["source"])
+                line["target"] = st.text_area("Khmer", value=line["target"], key=f"target_{index}", placeholder="បញ្ចូលការបកប្រែខ្មែរ…", label_visibility="collapsed")
 
-    else:
-        st.markdown('<div class="eyebrow">About the project</div>', unsafe_allow_html=True)
-        st.title("AI KHEMRA BRO")
-        st.markdown('<p class="hero-copy">គម្រោងដែលផ្តោតលើការធ្វើឲ្យបច្ចេកវិទ្យា AI មានអារម្មណ៍ថាជិតស្និទ្ធ និងងាយប្រើសម្រាប់អ្នកប្រើប្រាស់ភាសាខ្មែរ។</p>', unsafe_allow_html=True)
-        st.info("GitHub: github.com/kmr64681-create/AI-KHEMRA-BRO")
-        st.markdown("### Direction\n\n- Khmer language tools\n- Practical AI workflows\n- Friendly interfaces\n- Open-source experiments")
+    with tabs[2]:
+        st.markdown("## Subtitle to Speech")
+        st.caption("បម្លែង subtitle ដែលបានបកប្រែទៅជាសំឡេងខ្មែរ។")
+        st.text_area("SRT text", value=export_subtitle(st.session_state.lines, st.session_state.format), height=200)
+        voice = st.selectbox("Voice", ["Khmer Female 01", "Khmer Male 01", "Khmer Neutral"])
+        if st.button("🎙️ Generate Khmer Audio", type="primary"):
+            st.info(f"Voice {voice} ត្រូវបានជ្រើសរើស។ ភ្ជាប់ TTS provider ដើម្បីបង្កើត MP3/WAV។")
+
+    with tabs[3]:
+        st.markdown("## Text-to-Speech")
+        st.text_area("Text to speak", placeholder="សរសេរអត្ថបទខ្មែរនៅទីនេះ…", height=190)
+        c1, c2 = st.columns(2)
+        with c1:
+            st.selectbox("Voice", ["Khmer Female 01", "Khmer Male 01", "Khmer Neutral"])
+        with c2:
+            st.slider("Speed", 0.7, 1.3, 1.0, 0.05)
+        if st.button("🔊 Generate speech", type="primary", use_container_width=True):
+            st.info("Text-to-Speech UI ត្រូវបានរៀបចំរួច។ ភ្ជាប់ speech provider ដើម្បីទទួលបាន audio file។")
 
 
 if __name__ == "__main__":
