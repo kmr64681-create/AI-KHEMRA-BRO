@@ -64,6 +64,19 @@ st.markdown(
       [data-testid="stFileUploader"] { background:#121a29; border:1px dashed #35506f; border-radius:15px; padding:10px; }
       textarea, input { background:#111a2a !important; color:#f4f7ff !important; }
       .stAlert { background:#172236; }
+      .mobile-clear > button { background:#18d7ee; border-color:#18d7ee; color:#06111d; box-shadow:0 0 14px rgba(24,215,238,.35); }
+      @media (max-width: 700px) {
+        [data-testid="stSidebar"] { display:none; }
+        [data-testid="stAppViewContainer"] > .main { padding:1.3rem .72rem 2rem; }
+        .sample-header { margin-top:.15rem; padding:25px 14px 21px; }
+        .sample-header-title { font-size:27px; }
+        .sample-header-sub { font-size:9px; letter-spacing:.08em; }
+        .sample-header-kh, .social-row { display:none; }
+        .stTabs [data-baseweb="tab-list"] { gap:5px; }
+        .stTabs [data-baseweb="tab"] { min-width:0; padding:9px 5px; font-size:10px; white-space:normal; text-align:center; }
+        h2 { font-size:25px !important; line-height:1.15 !important; }
+        .stButton > button, .stDownloadButton > button { min-height:38px; font-size:11px; }
+      }
     </style>
     """,
     unsafe_allow_html=True,
@@ -206,23 +219,29 @@ def main() -> None:
 
     st.markdown('<div class="sample-header"><div class="sample-header-title">AI KHEMRA BRO</div><div class="sample-header-sub">GLOBAL KHMER AI DUBBING WORKSTATION</div><div class="sample-header-kh">បកប្រែ subtitle និងបង្កើតសំឡេងខ្មែរ ក្នុងកម្មវិធីតែមួយ</div><div class="social-row"><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO" target="_blank">💻 GitHub</a><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO/issues" target="_blank">🛠️ Support</a></div></div>', unsafe_allow_html=True)
 
-    tabs = st.tabs(["🎬 AI Video Dubbing", "🌐 AI SRT Translator", "📜 Subtitle to Speech", "🎙️ Text-to-Speech"])
+    tabs = st.tabs(["📹 Video → SRT", "🗎 AI Subtitle Translator", "📜 SRT → Speech", "🎙️ Text → Speech"])
 
     with tabs[0]:
-        st.markdown("## 1. Generate Subtitles (ខ្មែរ)")
-        video = st.file_uploader("Upload video", type=["mp4", "mov", "avi", "mkv"], key="video_upload")
+        st.markdown("## 1️⃣ Generate Subtitles (Khmer (ខ្មែរ))")
+        video = st.file_uploader("Upload Video", type=["mp4", "mov", "avi", "mkv"], key="video_upload")
         if video:
             st.success(f"បាន upload: {video.name} · {video.size / 1024 / 1024:.1f} MB")
-        st.text_area("Generated SRT from video", placeholder="Generated subtitle text will appear here after connecting a transcription model…", height=170)
+        st.markdown("### Generated SRT")
+        st.caption("You can edit the SRT here before generating audio:")
+        st.text_area("Generated SRT", placeholder="Generated subtitle text will appear here after connecting a transcription model…", height=210, label_visibility="collapsed")
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("✨ Generate subtitles", type="primary", use_container_width=True):
-                st.info("Video transcription UI is ready. Connect a speech-to-text model to generate timestamps automatically.")
+            st.write("")
         with c2:
-            if st.button("🗑️ Clear video project", use_container_width=True):
-                st.rerun()
-        st.markdown("## 2. AI Dubbing (Khmer Voice Studio)")
-        st.info("Upload a video or paste SRT, then connect TTS to generate Khmer dubbed audio.")
+            if st.button("🧠 Analyze Inner Thoughts", type="primary", use_container_width=True):
+                st.info("Video transcription UI is ready. Connect a speech-to-text model to generate timestamps automatically.")
+        st.markdown("## 2️⃣ AI Dubbing (Edge TTS Studio)")
+        if st.button("🎙️ Generate Dubbed Audio (MP3)", type="primary"):
+            st.info("ភ្ជាប់ Edge TTS provider ដើម្បីបង្កើតសំឡេង dubbing ជា MP3។")
+        st.markdown('<div class="mobile-clear">', unsafe_allow_html=True)
+        if st.button("🗑️ Clear Video Project", use_container_width=True):
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with tabs[1]:
         st.markdown("## AI SRT Translator")
