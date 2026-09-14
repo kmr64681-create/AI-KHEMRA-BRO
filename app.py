@@ -192,16 +192,21 @@ def main() -> None:
 
     with st.sidebar:
         st.markdown('<div class="brand-card"><div class="brand-mark">ខ</div><div class="brand-name">AI KHEMRA BRO</div><div class="brand-sub">GLOBAL AI DUBBING & SUBTITLING</div></div>', unsafe_allow_html=True)
-        st.markdown('<div class="profile-card"><div class="profile-name">👋 AI KHEMRA BRO</div><div style="color:#a9b6cb;font-size:12px;margin-top:7px">ROLE: CREATOR</div><div style="color:#a9b6cb;font-size:12px">PLAN: COMMUNITY</div><div style="color:#a9b6cb;font-size:12px">ACCESS: ACTIVE WORKSPACE</div><div style="color:#20d9ed;font-size:12px;font-weight:700;margin-top:5px">289 DAYS LEFT</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="profile-card"><div class="profile-name">👋 somevut036</div><div style="color:#f4f7ff;font-size:16px;margin-top:12px">ROLE: SOMEVUT036</div><div style="color:#f4f7ff;font-size:16px;margin-top:8px">🗓️ PLAN: 2027-06-30</div><div style="color:#f4f7ff;font-size:16px;font-weight:700;margin-top:8px">⌛ 289 DAYS LEFT</div></div>', unsafe_allow_html=True)
         if st.button("🚪 Logout", use_container_width=True):
             st.info("នេះជាកម្មវិធី demo ដោយមិនទាន់មាន account session។")
-        st.markdown("### 🎯 Target Language (ភាសាគោលដៅ)")
-        st.selectbox("Target language", ["Khmer (ខ្មែរ)", "English", "Thai", "Vietnamese"], label_visibility="collapsed")
+        st.markdown("### 🌍 Target Language (ភាសាគោលដៅ)")
+        st.caption("ជ្រើសរើសភាសា (Select Language):")
+        st.selectbox("Target language", ["Khmer (ខ្មែរ)", "English", "Thai", "Vietnamese"], label_visibility="collapsed", key="target_language")
         st.markdown("### 🔑 API Keys Manager")
-        st.text_area("Gemini API keys", placeholder="Paste Gemini API keys here (one per line)", height=95, label_visibility="collapsed", key="gemini_api_keys")
-        st.caption("API keys are only used for the current session.")
-        st.markdown("### 🌐 Google Translation API")
-        google_api_key = st.text_input("Google API key", type="password", placeholder="AIza…", key="google_translation_api_key")
+        st.caption("Paste Gemini API Keys (One per line)")
+        gemini_api_keys = st.text_area("Gemini API keys", placeholder="", height=95, label_visibility="collapsed", key="gemini_api_keys")
+        if not gemini_api_keys.strip():
+            st.warning("⚠️ សូមបញ្ចូល API Key ក្នុងប្រអប់ខាងលើសិន!")
+        st.markdown("### 🎭 Translation Style")
+        st.caption("ជ្រើសរើសប្រភពបកប្រែ (Translate API):")
+        translation_provider = st.radio("Translate API", ["Gemini API", "Google API"], label_visibility="collapsed", key="translation_provider")
+        google_api_key = st.text_input("Google API key", type="password", placeholder="Google API key (AIza…)", key="google_translation_api_key")
         google_source = st.selectbox("Source language", [("auto", "Auto detect"), ("zh-CN", "Chinese (简体中文)"), ("en", "English")], format_func=lambda item: item[1], key="google_source_language")
         google_target = st.selectbox("Google target language", [("km", "Khmer (ខ្មែរ)"), ("en", "English"), ("th", "Thai")], format_func=lambda item: item[1], key="google_target_language")
         if st.button("Test Google API key", use_container_width=True):
@@ -210,12 +215,13 @@ def main() -> None:
                 st.success("Google Translation API key ដំណើរការ។")
             except (ValueError, RuntimeError) as error:
                 st.error(str(error))
-        st.caption("សោនេះប្រើតែក្នុង session បច្ចុប្បន្ន និងមិនត្រូវបានរក្សាទុកក្នុង GitHub ទេ។")
-        st.markdown("### 🎚️ Translation Style")
-        st.radio("Translation style", ["Natural movie dialogue", "Literal translation", "Formal Khmer"], label_visibility="collapsed")
-        st.markdown("### ⚙️ Voice Settings")
-        st.radio("Voice mode", ["Auto", "All Male", "All Female"], label_visibility="collapsed")
-        st.selectbox("AI model", ["Gemini Flash", "Gemini Pro", "OpenAI GPT"], label_visibility="collapsed")
+        st.markdown("### ⚙️ Audio Sync Mode")
+        st.caption("ជ្រើសរើសល្បឿនសំឡេង:")
+        st.radio("Audio sync", ["Speed Up Only (លឿន)", "Speed Up & Slow Down (លឿន និង យឺត)"], label_visibility="collapsed", key="audio_sync_mode")
+        st.markdown("### 🗣️ Voice Mode (ជ្រើសរើសសំឡេង)")
+        st.caption("កំណត់សំឡេងសម្រាប់ Tab 1 & Tab 2:")
+        st.radio("Voice mode", ["Auto (ប្រុស/ស្រី តាម Tag)", "All Male (ប្រុសសុទ្ធ)", "All Female (ស្រីសុទ្ធ)"], label_visibility="collapsed", key="voice_mode")
+        st.selectbox("AI model", ["Gemini Flash", "Gemini Pro", "OpenAI GPT"], label_visibility="collapsed", key="ai_model")
 
     st.markdown('<div class="sample-header"><div class="sample-header-title">AI KHEMRA BRO</div><div class="sample-header-sub">GLOBAL KHMER AI DUBBING WORKSTATION</div><div class="sample-header-kh">បកប្រែ subtitle និងបង្កើតសំឡេងខ្មែរ ក្នុងកម្មវិធីតែមួយ</div><div class="social-row"><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO" target="_blank">💻 GitHub</a><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO/issues" target="_blank">🛠️ Support</a></div></div>', unsafe_allow_html=True)
 
