@@ -128,6 +128,15 @@ def demo_lines() -> list[SubtitleLine]:
     return parse_srt("1\n00:00:02,000 --> 00:00:04,700\n你终于来了。\n\n2\n00:00:05,200 --> 00:00:08,000\n我等你很久了。\n\n3\n00:00:08,600 --> 00:00:12,000\n今晚的月亮，真的很漂亮。")
 
 
+def show_translation_notice(message: str, kind: str = "info") -> None:
+    if kind == "success":
+        st.success(message)
+    elif kind == "warning":
+        st.warning(message)
+    else:
+        st.info(message)
+
+
 def main() -> None:
     with st.sidebar:
         st.markdown('<div class="brand"><div class="brand-mark">ខ</div><div class="brand-title">AI KHEMRA BRO</div></div>', unsafe_allow_html=True)
@@ -181,7 +190,28 @@ def main() -> None:
             st.metric("Format", fmt.upper())
         st.progress(translated / len(lines) if lines else 0)
 
-        controls = st.columns([1, 1, 1, 1.4])
+        st.markdown("### Story translation controls")
+        st.caption("ជ្រើសរើសសកម្មភាពខាងក្រោម ដើម្បីបកប្រែរឿង និងរៀបចំឯកសាររបស់អ្នក។")
+        selected_id = st.selectbox("Selected subtitle line", [line["id"] for line in lines], format_func=lambda value: f"Line {value:02d}")
+        action_col_1, action_col_2 = st.columns(2, gap="medium")
+        with action_col_1:
+            if st.button("✨ Translate whole story", type="primary", use_container_width=True):
+                show_translation_notice("ប៊ូតុងបកប្រែរឿងទាំងមូលរួចរាល់សម្រាប់ភ្ជាប់ AI translation service។ បច្ចុប្បន្ន អ្នកអាចកែសម្រួលខ្មែរដោយដៃតាមបន្ទាត់ខាងក្រោម។", "warning")
+            if st.button("↗ Translate selected line", use_container_width=True):
+                show_translation_notice(f"បានជ្រើសរើស Line {selected_id:02d}។ វានឹងបកប្រែជាខ្មែរនៅពេលភ្ជាប់ AI service។")
+        with action_col_2:
+            if st.button("↺ Reset demo story", use_container_width=True):
+                st.session_state.lines = demo_lines()
+                st.session_state.file_name = "demo-scene.srt"
+                st.session_state.format = "srt"
+                st.rerun()
+            if st.button("⌫ Clear all Khmer translations", use_container_width=True):
+                for line in lines:
+                    line["target"] = ""
+                show_translation_notice("បានលុបការបកប្រែខ្មែរទាំងអស់ចេញពី workspace។", "success")
+
+        st.markdown("### File actions")
+        controls = st.columns([1, 1, 1.4])
         with controls[0]:
             if st.button("Reset demo", use_container_width=True):
                 st.session_state.lines = demo_lines()
@@ -195,9 +225,7 @@ def main() -> None:
                 st.rerun()
         with controls[2]:
             export = export_subtitle(lines, fmt)
-            st.download_button("Download file", export, file_name=f"{Path(st.session_state.file_name).stem}-kh.{fmt}", mime="text/plain", use_container_width=True)
-        with controls[3]:
-            st.info("AI translation connection can be added next; edit each Khmer field below for now.")
+            st.download_button("Download translated file", export, file_name=f"{Path(st.session_state.file_name).stem}-kh.{fmt}", mime="text/plain", use_container_width=True)
 
         st.markdown(f'<div class="panel"><span class="format-pill">{fmt.upper()}</span> <strong>{st.session_state.file_name}</strong><hr/>', unsafe_allow_html=True)
         for index, line in enumerate(lines):
