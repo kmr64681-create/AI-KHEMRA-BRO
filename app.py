@@ -1,4 +1,8 @@
 import re
+import json
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import TypedDict
 
@@ -138,6 +142,35 @@ def load_demo() -> None:
     st.session_state.format = "srt"
 
 
+def google_translate(texts: list[str], api_key: str, source: str, target: str) -> list[str]:
+    """Translate subtitle text with Google Cloud Translation Basic API v2."""
+    if not api_key.strip():
+        raise ValueError("សូមបញ្ចូល Google Translate API key ជាមុនសិន។")
+    query = [("key", api_key.strip()), ("target", target), ("format", "text")]
+    if source != "auto":
+        query.append(("source", source))
+    query.extend(("q", text) for text in texts)
+    request = urllib.request.Request(
+        "https://translate.googleapis.com/language/translate/v2?" + urllib.parse.urlencode(query),
+        headers={"Accept": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        try:
+            detail = json.loads(error.read().decode("utf-8")).get("error", {}).get("message", "Request rejected")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            detail = "Request rejected"
+        raise RuntimeError(f"Google Translation API: {detail}") from error
+    except urllib.error.URLError as error:
+        raise RuntimeError("មិនអាចភ្ជាប់ Google Translation API បានទេ។") from error
+    translations = payload.get("data", {}).get("translations", [])
+    if len(translations) != len(texts):
+        raise RuntimeError("Google Translation API បានឆ្លើយតបមិនពេញលេញ។")
+    return [item.get("translatedText", "") for item in translations]
+
+
 def main() -> None:
     if "lines" not in st.session_state:
         load_demo()
@@ -152,6 +185,17 @@ def main() -> None:
         st.markdown("### 🔑 AI Settings")
         st.text_area("API keys", placeholder="Paste API keys here (one per line)", height=95, label_visibility="collapsed")
         st.caption("API keys are only used for the current session.")
+        st.markdown("### 🌐 Google Translation API")
+        google_api_key = st.text_input("Google API key", type="password", placeholder="AIza…", key="google_translation_api_key")
+        google_source = st.selectbox("Source language", [("auto", "Auto detect"), ("zh-CN", "Chinese (简体中文)"), ("en", "English")], format_func=lambda item: item[1], key="google_source_language")
+        google_target = st.selectbox("Google target language", [("km", "Khmer (ខ្មែរ)"), ("en", "English"), ("th", "Thai")], format_func=lambda item: item[1], key="google_target_language")
+        if st.button("Test Google API key", use_container_width=True):
+            try:
+                google_translate(["Hello"], google_api_key, google_source[0], google_target[0])
+                st.success("Google Translation API key ដំណើរការ។")
+            except (ValueError, RuntimeError) as error:
+                st.error(str(error))
+        st.caption("សោនេះប្រើតែក្នុង session បច្ចុប្បន្ន និងមិនត្រូវបានរក្សាទុកក្នុង GitHub ទេ។")
         st.markdown("### 🎚️ Translation Style")
         st.radio("Translation style", ["Natural movie dialogue", "Literal translation", "Formal Khmer"], label_visibility="collapsed")
         st.markdown("### ⚙️ Voice Settings")
@@ -207,12 +251,23 @@ def main() -> None:
         c1, c2, c3, c4, c5 = st.columns(5)
         with c1:
             if st.button("✨ Translate whole story", type="primary", use_container_width=True):
-                st.warning("ប៊ូតុងរួចរាល់សម្រាប់ភ្ជាប់ AI translation API។ បច្ចុប្បន្ន អ្នកអាចកែសម្រួលបន្ទាត់ខ្មែរដោយដៃ។")
+                try:
+                    translated_text = google_translate([line["source"] for line in lines], google_api_key, google_source[0], google_target[0])
+                    for line, result in zip(lines, translated_text):
+                        line["target"] = result
+                    st.success(f"បានបកប្រែ {len(translated_text)} បន្ទាត់ដោយ Google Translate។")
+                except (ValueError, RuntimeError) as error:
+                    st.error(str(error))
         with c2:
             line_ids = [line["id"] for line in lines]
             selected_id = st.selectbox("Line", line_ids, format_func=lambda value: f"Line {value:02d}", label_visibility="collapsed")
             if st.button("Translate line", use_container_width=True):
-                st.info(f"Line {selected_id:02d} បានជ្រើសរើសសម្រាប់បកប្រែ។")
+                selected_line = next(line for line in lines if line["id"] == selected_id)
+                try:
+                    selected_line["target"] = google_translate([selected_line["source"]], google_api_key, google_source[0], google_target[0])[0]
+                    st.success(f"Line {selected_id:02d} បានបកប្រែដោយ Google Translate។")
+                except (ValueError, RuntimeError) as error:
+                    st.error(str(error))
         with c3:
             export = export_subtitle(lines, fmt)
             st.download_button("⬇️ Download", export, file_name=f"{Path(st.session_state.file_name).stem}-kh.{fmt}", mime="text/plain", use_container_width=True)

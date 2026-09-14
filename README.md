@@ -44,6 +44,10 @@
 
 This repository includes a usable Streamlit interface with the AI KHEMRA BRO branding, a dark dubbing-workstation layout, sidebar settings, and tabs for AI Video Dubbing, AI SRT Translator, Subtitle to Speech, and Text-to-Speech. The subtitle workflow supports `.srt`, `.ass`, and `.vtt` files.
 
+## Google Translation API
+
+In the sidebar, open **Google Translation API**, paste a Google Cloud Translation API key, choose the source and target languages, and press **Test Google API key**. The **Translate whole story** and **Translate line** actions use Google Cloud Translation API v2. The key is held only in the current Streamlit session and is not written to the repository. The Google Cloud project must have Cloud Translation API enabled and billing configured according to Google's current requirements.
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
