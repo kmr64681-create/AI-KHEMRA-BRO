@@ -229,7 +229,7 @@ def main() -> None:
         st.markdown("## Subtitle to Speech")
         st.caption("បម្លែង subtitle ដែលបានបកប្រែទៅជាសំឡេងខ្មែរ។")
         st.text_area("SRT text", value=export_subtitle(st.session_state.lines, st.session_state.format), height=200)
-        voice = st.selectbox("Voice", ["Khmer Female 01", "Khmer Male 01", "Khmer Neutral"])
+        voice = st.selectbox("Voice", ["Khmer Female 01", "Khmer Male 01", "Khmer Neutral"], key="subtitle_speech_voice")
         if st.button("🎙️ Generate Khmer Audio", type="primary"):
             st.info(f"Voice {voice} ត្រូវបានជ្រើសរើស។ ភ្ជាប់ TTS provider ដើម្បីបង្កើត MP3/WAV។")
 
@@ -238,7 +238,7 @@ def main() -> None:
         st.text_area("Text to speak", placeholder="សរសេរអត្ថបទខ្មែរនៅទីនេះ…", height=190)
         c1, c2 = st.columns(2)
         with c1:
-            st.selectbox("Voice", ["Khmer Female 01", "Khmer Male 01", "Khmer Neutral"])
+            st.selectbox("Voice", ["Khmer Female 01", "Khmer Male 01", "Khmer Neutral"], key="tts_voice")
         with c2:
             st.slider("Speed", 0.7, 1.3, 1.0, 0.05)
         if st.button("🔊 Generate speech", type="primary", use_container_width=True):
