@@ -67,14 +67,20 @@ st.markdown(
       .stAlert { background:#172236; }
       .mobile-clear > button { background:#18d7ee; border-color:#18d7ee; color:#06111d; box-shadow:0 0 14px rgba(24,215,238,.35); }
       @media (max-width: 700px) {
-        [data-testid="stSidebar"] { display:none; }
+        /* Keep Streamlit's native sidebar toggle usable on phones. */
+        [data-testid="stSidebar"] { min-width: min(86vw, 360px); max-width: min(86vw, 360px); }
         [data-testid="stAppViewContainer"] > .main { padding:1.3rem .72rem 2rem; }
         .sample-header { margin-top:.15rem; padding:25px 14px 21px; }
         .sample-header-title { font-size:27px; }
         .sample-header-sub { font-size:9px; letter-spacing:.08em; }
         .sample-header-kh, .social-row { display:none; }
-        .stTabs [data-baseweb="tab-list"] { gap:5px; }
-        .stTabs [data-baseweb="tab"] { min-width:0; padding:9px 5px; font-size:10px; white-space:normal; text-align:center; }
+        /* Two-column tab grid prevents Screen 2 from being clipped off-screen. */
+        .stTabs [data-baseweb="tab-list"] { gap:5px; flex-wrap:wrap; overflow:visible; }
+        .stTabs [data-baseweb="tab"] { flex:1 1 44%; min-width:44%; padding:9px 5px; font-size:10px; white-space:normal; text-align:center; }
+        .stTabs [data-baseweb="tab-highlight"] { display:none; }
+        .stTabs [data-baseweb="tab-border"] { display:none; }
+        .stHorizontalBlock { flex-wrap:wrap; }
+        .stHorizontalBlock > div { min-width: min(100%, 160px); }
         h2 { font-size:25px !important; line-height:1.15 !important; }
         .stButton > button, .stDownloadButton > button { min-height:38px; font-size:11px; }
       }
