@@ -204,6 +204,65 @@ def configured_google_key() -> str:
     return secret_key.strip() or os.environ.get("GOOGLE_TRANSLATE_API_KEY", "").strip()
 
 
+def configured_gemini_key() -> str:
+    """Read one Google AI Studio key from Streamlit secrets or the environment."""
+    try:
+        secret_key = str(st.secrets.get("GEMINI_API_KEY", ""))
+    except (FileNotFoundError, KeyError, RuntimeError):
+        secret_key = ""
+    return secret_key.strip() or os.environ.get("GEMINI_API_KEY", "").strip()
+
+
+def gemini_translate(texts: list[str], api_key: str, model: str, target_language: str) -> list[str]:
+    """Translate multiple subtitle lines with the Google Gemini generateContent API."""
+    if not api_key.strip():
+        raise ValueError("សូមបញ្ចូល Google AI Studio (Gemini) API key ជាមុនសិន។")
+    numbered = "\n".join(f"{index + 1}. {text}" for index, text in enumerate(texts))
+    prompt = (
+        f"Translate each numbered subtitle line into {target_language}. "
+        "Keep the same order and return only a JSON array of strings, with no markdown. "
+        f"Subtitle lines:\n{numbered}"
+    )
+    payload = json.dumps({"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.2}}).encode()
+    request = urllib.request.Request(
+        f"https://generativelanguage.googleapis.com/v1beta/models/{urllib.parse.quote(model)}:generateContent?key={urllib.parse.quote(api_key.strip())}",
+        data=payload,
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=45) as response:
+            result = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        try:
+            detail = json.loads(error.read().decode("utf-8")).get("error", {}).get("message", "Request rejected")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            detail = "Request rejected"
+        raise RuntimeError(f"Google Gemini API: {detail}") from error
+    except urllib.error.URLError as error:
+        raise RuntimeError("មិនអាចភ្ជាប់ Google Gemini API បានទេ។") from error
+    try:
+        answer = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except (KeyError, IndexError, TypeError) as error:
+        raise RuntimeError("Google Gemini API មិនបានផ្ញើលទ្ធផលបកប្រែត្រឡប់មកទេ។") from error
+    answer = re.sub(r"^```(?:json)?\s*|\s*```$", "", answer, flags=re.I).strip()
+    try:
+        translated = json.loads(answer)
+    except json.JSONDecodeError as error:
+        translated = [line.strip().split(". ", 1)[-1] for line in answer.splitlines() if line.strip()]
+        if len(translated) != len(texts):
+            raise RuntimeError("Google Gemini API បានត្រឡប់ទម្រង់លទ្ធផលមិនត្រឹមត្រូវ។") from error
+    if not isinstance(translated, list) or len(translated) != len(texts):
+        raise RuntimeError("Google Gemini API បានបកប្រែមិនគ្រប់ចំនួនបន្ទាត់។")
+    return [str(item) for item in translated]
+
+
+def translate_with_provider(texts: list[str], provider: str, google_key: str, gemini_key: str, model: str, source: str, target: str, target_label: str) -> list[str]:
+    if provider == "Google Gemini AI":
+        return gemini_translate(texts, gemini_key, model, target_label)
+    return google_translate(texts, google_key, source, target)
+
+
 def main() -> None:
     if "lines" not in st.session_state:
         load_demo()
@@ -216,23 +275,30 @@ def main() -> None:
         st.markdown("### 🌍 Target Language (ភាសាគោលដៅ)")
         st.caption("ជ្រើសរើសភាសា (Select Language):")
         st.selectbox("Target language", ["Khmer (ខ្មែរ)", "English", "Thai", "Vietnamese"], label_visibility="collapsed", key="target_language")
-        st.markdown("### 🔑 API Keys Manager")
-        st.caption("Optional: paste Gemini API Keys (one per line)")
-        gemini_api_keys = st.text_area("Gemini API keys", placeholder="", height=95, label_visibility="collapsed", key="gemini_api_keys")
-        if gemini_api_keys.strip():
-            st.success("Gemini key loaded for this session.")
+        st.markdown("### 🤖 Translation settings")
+        st.caption("ជ្រើសរើស provider មួយ និងប្រើ API key តែមួយ")
+        translation_provider = st.selectbox("Translation provider", ["Google Gemini AI", "Google Translate API"], key="translation_provider")
+        gemini_api_key = configured_gemini_key()
+        google_api_key = configured_google_key()
+        if translation_provider == "Google Gemini AI":
+            gemini_api_key = st.text_input("Google AI Studio API key", value=gemini_api_key, type="password", placeholder="AIza…", key="gemini_api_key")
         else:
-            st.caption("Demo mode: subtitle upload, editing, export, and sample data work without an AI key.")
-        st.markdown("### 🎭 Translation Style")
-        st.caption("ជ្រើសរើសប្រភពបកប្រែ (Translate API):")
-        translation_provider = st.radio("Translate API", ["Gemini API", "Google API"], label_visibility="collapsed", key="translation_provider")
-        google_api_key = st.text_input("Google API key", value=configured_google_key(), type="password", placeholder="Google API key (AIza…)", key="google_translation_api_key")
+            google_api_key = st.text_input("Google Translate API key", value=google_api_key, type="password", placeholder="ជាជម្រើសសម្រាប់ Google Translate", key="google_translation_api_key")
         google_source = st.selectbox("Source language", [("auto", "Auto detect"), ("zh-CN", "Chinese (简体中文)"), ("en", "English")], format_func=lambda item: item[1], key="google_source_language")
-        google_target = st.selectbox("Google target language", [("km", "Khmer (ខ្មែរ)"), ("en", "English"), ("th", "Thai")], format_func=lambda item: item[1], key="google_target_language")
-        if st.button("Test Google API key", use_container_width=True):
+        google_target = st.selectbox("Target language", [("km", "Khmer (ខ្មែរ)"), ("en", "English"), ("th", "Thai")], format_func=lambda item: item[1], key="google_target_language")
+        target_label = dict([("km", "Khmer"), ("en", "English"), ("th", "Thai")])[google_target[0]]
+        gemini_model = st.selectbox("Gemini model", ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.5-pro"], key="gemini_model")
+        if translation_provider == "Google Gemini AI":
+            st.caption("Gemini បកប្រែ subtitle ដោយរក្សាលំដាប់ line និងទម្រង់ JSON។")
+        else:
+            st.caption("Google Translate API ត្រូវការ Cloud Translation API និង billing។")
+        if st.button("Test selected provider", use_container_width=True):
             try:
-                google_translate(["Hello"], google_api_key, google_source[0], google_target[0])
-                st.success("Google Translation API key ដំណើរការ។")
+                if translation_provider == "Google Gemini AI":
+                    gemini_translate(["Hello"], gemini_api_key, gemini_model, target_label)
+                else:
+                    google_translate(["Hello"], google_api_key, google_source[0], google_target[0])
+                st.success("Translation provider ដំណើរការ។")
             except (ValueError, RuntimeError) as error:
                 st.error(str(error))
         st.markdown("### ⚙️ Audio Sync Mode")
@@ -241,7 +307,6 @@ def main() -> None:
         st.markdown("### 🗣️ Voice Mode (ជ្រើសរើសសំឡេង)")
         st.caption("កំណត់សំឡេងសម្រាប់ Tab 1 & Tab 2:")
         st.radio("Voice mode", ["Auto (ប្រុស/ស្រី តាម Tag)", "All Male (ប្រុសសុទ្ធ)", "All Female (ស្រីសុទ្ធ)"], label_visibility="collapsed", key="voice_mode")
-        st.selectbox("AI model", ["Demo / local UI", "Gemini Flash (requires provider)", "Gemini Pro (requires provider)"], label_visibility="collapsed", key="ai_model")
 
     st.markdown('<div class="sample-header"><div class="sample-header-title">AI KHEMRA BRO</div><div class="sample-header-sub">GLOBAL KHMER AI DUBBING WORKSTATION</div><div class="sample-header-kh">បកប្រែ subtitle និងបង្កើតសំឡេងខ្មែរ ក្នុងកម្មវិធីតែមួយ</div><div class="social-row"><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO" target="_blank">💻 GitHub</a><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO/issues" target="_blank">🛠️ Support</a></div></div>', unsafe_allow_html=True)
 
@@ -310,7 +375,7 @@ def main() -> None:
         with translate_col:
             if st.button("✨ Translate whole story", type="primary", use_container_width=True):
                 try:
-                    translated_text = google_translate([line["source"] for line in lines], google_api_key, google_source[0], google_target[0])
+                    translated_text = translate_with_provider([line["source"] for line in lines], translation_provider, google_api_key, gemini_api_key, gemini_model, google_source[0], google_target[0], target_label)
                     for line, result in zip(lines, translated_text):
                         line["target"] = result
                     st.success(f"បានបកប្រែ {len(translated_text)} បន្ទាត់ដោយ Google Translate។")
@@ -322,7 +387,7 @@ def main() -> None:
             if st.button("Translate line", use_container_width=True):
                 selected_line = next(line for line in lines if line["id"] == selected_id)
                 try:
-                    selected_line["target"] = google_translate([selected_line["source"]], google_api_key, google_source[0], google_target[0])[0]
+                    selected_line["target"] = translate_with_provider([selected_line["source"]], translation_provider, google_api_key, gemini_api_key, gemini_model, google_source[0], google_target[0], target_label)[0]
                     st.success(f"Line {selected_id:02d} បានបកប្រែដោយ Google Translate។")
                 except (ValueError, RuntimeError) as error:
                     st.error(str(error))
