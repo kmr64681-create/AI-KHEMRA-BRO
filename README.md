@@ -1,58 +1,48 @@
 # AI KHEMRA BRO
 
-> Khmer-first AI tools, ideas, and experiments.
+> Khmer-first AI dubbing, subtitle translation, and speech tools.
 
-សួស្តី! ខ្ញុំគឺ **AI KHEMRA BRO** — គម្រោងដែលផ្តោតលើការប្រើប្រាស់បច្ចេកវិទ្យា AI ដើម្បីបង្កើតឧបករណ៍ងាយប្រើ សម្រាប់អ្នកប្រើប្រាស់ភាសាខ្មែរ។
+AI KHEMRA BRO is a Khmer-focused Streamlit workstation for video transcription, subtitle translation, multilingual voice generation, and dubbing workflows.
 
-## About the project
+## Features
 
-**AI KHEMRA BRO** is a Khmer-focused space for building practical AI experiences, experimenting with modern software, and making technology feel more accessible to Cambodian users.
+- **Video → SRT:** transcribe uploaded video with Gemini and preserve timestamps.
+- **AI Subtitle Translator:** translate SRT content while preserving cue timing and review the result before download.
+- **SRT → Speech:** synthesize tagged subtitle dialogue into MP3 with Edge TTS and optional audio filters.
+- **Text → Speech:** generate a single voice track from Khmer or multilingual text.
+- **Mobile UI:** responsive four-tab layout, compact upload controls, and settings popover.
+- **Owner tools:** optional license/session administration and encrypted backup workflows.
 
-គោលបំណងសំខាន់ៗ៖
+Supported subtitle formats include `.srt`, `.ass`, and `.vtt` where applicable. Video and audio processing uses FFmpeg.
 
-- បង្កើត AI tools ដែលគាំទ្រភាសាខ្មែរ
-- រៀបចំ software ឲ្យងាយយល់ និងងាយប្រើ
-- សាកល្បងគំនិតថ្មីៗលើ AI, automation និង web development
-- ចែករំលែក project និងការរៀនសូត្រជាមួយសហគមន៍
+## Streamlit Cloud setup
 
-## What you may find here
+Add the following secrets in **App settings → Secrets**. The application supports multiple Gemini keys through a newline-separated value and rotates between valid keys when needed.
 
-- Khmer language tools and utilities
-- Translation and subtitle workflows
-- Web applications and experiments
-- Automation scripts and developer helpers
-- Notes, prototypes, and open-source ideas
+```toml
+GEMINI_API_KEYS = "AIza..."
+COOKIE_SECRET = "replace-with-a-long-random-secret"
+```
 
-## Tech interests
+For local development, the same values can be set in `.streamlit/secrets.toml` or supplied through the application settings. Never commit API keys, cookie secrets, customer access codes, or database backups to GitHub.
 
-`Artificial Intelligence` · `Khmer NLP` · `Web Development` · `Automation` · `Developer Tools`
+## Run locally
 
-## Connect
-
-- GitHub: [@kmr64681-create](https://github.com/kmr64681-create)
-- Repository: [AI-KHEMRA-BRO](https://github.com/kmr64681-create/AI-KHEMRA-BRO)
-
-## Languages
-
-**ខ្មែរ · English**
-
----
-
-> Built with curiosity, code, and a Khmer-first mindset.
-
-## Run the application
-
-This repository includes a usable Streamlit interface with the AI KHEMRA BRO branding, a dark dubbing-workstation layout, sidebar settings, and tabs for AI Video Dubbing, AI SRT Translator, Subtitle to Speech, and Text-to-Speech. The subtitle workflow supports `.srt`, `.ass`, and `.vtt` files.
-
-## Google Translation API
-
-In the sidebar, open **Google Translation API**, paste a Google Cloud Translation API key, choose the source and target languages, and press **Test Google API key**. The **Translate whole story** and **Translate line** actions use Google Cloud Translation API v2. The key is held only in the current Streamlit session and is not written to the repository. The Google Cloud project must have Cloud Translation API enabled and billing configured according to Google's current requirements.
+Install FFmpeg first, then install Python dependencies:
 
 ```bash
+sudo apt-get update && sudo apt-get install -y ffmpeg
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Then open the local URL shown by Streamlit in your browser.
+Open the local URL printed by Streamlit. The first transcription or speech-generation request may download model data and take longer than subsequent requests.
+
+## Repository
+
+- GitHub: [@kmr64681-create](https://github.com/kmr64681-create)
+- Repository: [AI-KHEMRA-BRO](https://github.com/kmr64681-create/AI-KHEMRA-BRO)
+
+> Built with a Khmer-first mindset.

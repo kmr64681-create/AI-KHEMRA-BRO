@@ -1,1 +1,6 @@
 streamlit>=1.39,<2
+edge-tts>=7.0,<8
+extra-streamlit-components>=0.1.80,<1
+cryptography>=43,<46
+google-genai>=1.30,<2
+faster-whisper>=1.1,<2
