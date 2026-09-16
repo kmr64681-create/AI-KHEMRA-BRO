@@ -1,5 +1,6 @@
 import re
 import json
+import os
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -186,6 +187,15 @@ def google_translate(texts: list[str], api_key: str, source: str, target: str) -
     return [item.get("translatedText", "") for item in translations]
 
 
+def configured_google_key() -> str:
+    """Read an optional translation key from Streamlit secrets or the environment."""
+    try:
+        secret_key = str(st.secrets.get("GOOGLE_TRANSLATE_API_KEY", ""))
+    except (FileNotFoundError, KeyError, RuntimeError):
+        secret_key = ""
+    return secret_key.strip() or os.environ.get("GOOGLE_TRANSLATE_API_KEY", "").strip()
+
+
 def main() -> None:
     if "lines" not in st.session_state:
         load_demo()
@@ -199,14 +209,16 @@ def main() -> None:
         st.caption("ជ្រើសរើសភាសា (Select Language):")
         st.selectbox("Target language", ["Khmer (ខ្មែរ)", "English", "Thai", "Vietnamese"], label_visibility="collapsed", key="target_language")
         st.markdown("### 🔑 API Keys Manager")
-        st.caption("Paste Gemini API Keys (One per line)")
+        st.caption("Optional: paste Gemini API Keys (one per line)")
         gemini_api_keys = st.text_area("Gemini API keys", placeholder="", height=95, label_visibility="collapsed", key="gemini_api_keys")
-        if not gemini_api_keys.strip():
-            st.warning("⚠️ សូមបញ្ចូល API Key ក្នុងប្រអប់ខាងលើសិន!")
+        if gemini_api_keys.strip():
+            st.success("Gemini key loaded for this session.")
+        else:
+            st.caption("Demo mode: subtitle upload, editing, export, and sample data work without an AI key.")
         st.markdown("### 🎭 Translation Style")
         st.caption("ជ្រើសរើសប្រភពបកប្រែ (Translate API):")
         translation_provider = st.radio("Translate API", ["Gemini API", "Google API"], label_visibility="collapsed", key="translation_provider")
-        google_api_key = st.text_input("Google API key", type="password", placeholder="Google API key (AIza…)", key="google_translation_api_key")
+        google_api_key = st.text_input("Google API key", value=configured_google_key(), type="password", placeholder="Google API key (AIza…)", key="google_translation_api_key")
         google_source = st.selectbox("Source language", [("auto", "Auto detect"), ("zh-CN", "Chinese (简体中文)"), ("en", "English")], format_func=lambda item: item[1], key="google_source_language")
         google_target = st.selectbox("Google target language", [("km", "Khmer (ខ្មែរ)"), ("en", "English"), ("th", "Thai")], format_func=lambda item: item[1], key="google_target_language")
         if st.button("Test Google API key", use_container_width=True):
@@ -221,7 +233,7 @@ def main() -> None:
         st.markdown("### 🗣️ Voice Mode (ជ្រើសរើសសំឡេង)")
         st.caption("កំណត់សំឡេងសម្រាប់ Tab 1 & Tab 2:")
         st.radio("Voice mode", ["Auto (ប្រុស/ស្រី តាម Tag)", "All Male (ប្រុសសុទ្ធ)", "All Female (ស្រីសុទ្ធ)"], label_visibility="collapsed", key="voice_mode")
-        st.selectbox("AI model", ["Gemini Flash", "Gemini Pro", "OpenAI GPT"], label_visibility="collapsed", key="ai_model")
+        st.selectbox("AI model", ["Demo / local UI", "Gemini Flash (requires provider)", "Gemini Pro (requires provider)"], label_visibility="collapsed", key="ai_model")
 
     st.markdown('<div class="sample-header"><div class="sample-header-title">AI KHEMRA BRO</div><div class="sample-header-sub">GLOBAL KHMER AI DUBBING WORKSTATION</div><div class="sample-header-kh">បកប្រែ subtitle និងបង្កើតសំឡេងខ្មែរ ក្នុងកម្មវិធីតែមួយ</div><div class="social-row"><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO" target="_blank">💻 GitHub</a><a href="https://github.com/kmr64681-create/AI-KHEMRA-BRO/issues" target="_blank">🛠️ Support</a></div></div>', unsafe_allow_html=True)
 
