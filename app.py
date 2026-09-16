@@ -1740,6 +1740,51 @@ def parse_json_array(raw_text):
     return value
 
 
+def gemini_json_tool(prompt, api_key, model):
+    """Run a small structured-output AI tool through the existing Gemini client."""
+    if not api_key:
+        raise ValueError("សូមបញ្ចូល Gemini API Key ក្នុង Settings ជាមុនសិន។")
+    client = genai.Client(api_key=api_key)
+    response = gemini_generate_with_retry(client, model, prompt, attempts=2)
+    return parse_json_array(response.text or "")
+
+
+def ai_polish_subtitle(source_srt, api_key, model, target_language_name):
+    prompt = f"""You are a professional subtitle editor. Polish the following subtitle dialogue into natural, concise {target_language_name}. Preserve the exact number and order of cues. Return only a JSON array of strings, one polished line per cue. Do not add timestamps, numbering, explanations, or markdown. Keep speaker tags such as [M], [F], [M_THINK], and [F_THINK] when present.\n\nSRT:\n{source_srt}"""
+    rows = gemini_json_tool(prompt, api_key, model)
+    if len(rows) == 0:
+        raise ValueError("AI មិនបានត្រឡប់ subtitle lines មកទេ។")
+    return [normalize_dialogue(row) for row in rows]
+
+
+def ai_subtitle_summary(source_srt, api_key, model, target_language_name):
+    prompt = f"""Analyze this subtitle script and write a concise synopsis in {target_language_name}. Return a JSON array containing exactly one string. Include: story premise, main conflict, tone, and up to three useful keywords. Do not invent names or events not supported by the subtitles.\n\nSRT:\n{source_srt}"""
+    rows = gemini_json_tool(prompt, api_key, model,)
+    if not rows or not str(rows[0]).strip():
+        raise ValueError("AI មិនបានបង្កើត synopsis មកទេ។")
+    return str(rows[0]).strip()
+
+
+def ai_speaker_suggestions(source_srt, api_key, model, target_language_name):
+    prompt = f"""Review this {target_language_name} subtitle script and suggest voice direction. Return a JSON array of objects with keys cue, tag, emotion, and direction. Use only tags M, F, M_THINK, or F_THINK. Return at most 20 objects and use cue numbers when available. Keep each direction under 12 words.\n\nSRT:\n{source_srt}"""
+    rows = gemini_json_tool(prompt, api_key, model)
+    cleaned = []
+    for row in rows[:20]:
+        if isinstance(row, dict):
+            cleaned.append({"cue": row.get("cue", ""), "tag": row.get("tag", "M"), "emotion": row.get("emotion", "Neutral"), "direction": row.get("direction", "")})
+    return cleaned
+
+
+def cues_to_srt(cues):
+    """Serialize the app's millisecond cue objects back to standard SRT."""
+    blocks = []
+    for cue in cues:
+        tag = cue.get("tag", "M")
+        text = normalize_dialogue(cue.get("text", ""))
+        blocks.append(f"{cue['id']}\n{ms_to_srt(cue['start'])} --> {ms_to_srt(cue['end'])}\n[{tag}] {text}")
+    return "\n\n".join(blocks) + ("\n" if blocks else "")
+
+
 def cue_word_limit(start, end):
     """Khmer spoken-word budget that fits normal dialogue speed."""
     duration = max(0.35, float(end) - float(start))
@@ -3781,11 +3826,11 @@ login_ok, login_message, login_row, current_token = validate_customer_login(
     current_token,
     acquire_session=False,
 )
-if not login_ok:
+if not login_ok or not login_row:
     _session_cookie_delete()
     for key in ("customer_authenticated", "customer_name", "customer_code", "customer_session_token"):
         st.session_state.pop(key, None)
-    st.error(login_message)
+    st.error(login_message or "សម័យចូលប្រើនេះមិនមាន customer record ទៀតទេ។ សូមចូលម្តងទៀត។")
     st.rerun()
 
 st.session_state.customer_session_token = current_token
@@ -4349,6 +4394,50 @@ with tab_translate:
             key="download_translated_srt",
             use_container_width=True,
         )
+    with st.expander("✨ AI Studio Tools", expanded=False):
+        st.caption("Polish dialogue, create a synopsis, and get voice-direction suggestions from Gemini.")
+        ai_source = st.session_state.get("translated_srt_preview") or source_srt
+        if not ai_source.strip():
+            st.info("បញ្ចូល SRT ជាមុនសិន ដើម្បីប្រើ AI Studio Tools។")
+        else:
+            polish_col, summary_col, voice_col = st.columns(3)
+            with polish_col:
+                if st.button("✨ Polish dialogue", key="ai_polish_dialogue", use_container_width=True):
+                    try:
+                        rows = ai_polish_subtitle(ai_source, api_key, model, target_language_name)
+                        cues = parse_srt(ai_source)
+                        if len(rows) != len(cues):
+                            raise ValueError("AI បានប្តូរចំនួន subtitle cues។ សូមសាកម្ដងទៀត។")
+                        polished = []
+                        for cue, text in zip(cues, rows):
+                            cue_copy = dict(cue)
+                            cue_copy["text"] = text
+                            polished.append(cue_copy)
+                        st.session_state.ai_polished_srt = cues_to_srt(polished)
+                    except Exception as exc:
+                        st.error(f"❌ {exc}")
+            with summary_col:
+                if st.button("📝 Create synopsis", key="ai_create_synopsis", use_container_width=True):
+                    try:
+                        st.session_state.ai_synopsis = ai_subtitle_summary(ai_source, api_key, model, target_language_name)
+                    except Exception as exc:
+                        st.error(f"❌ {exc}")
+            with voice_col:
+                if st.button("🎭 Voice direction", key="ai_voice_direction", use_container_width=True):
+                    try:
+                        st.session_state.ai_voice_suggestions = ai_speaker_suggestions(ai_source, api_key, model, target_language_name)
+                    except Exception as exc:
+                        st.error(f"❌ {exc}")
+            if st.session_state.get("ai_polished_srt"):
+                st.markdown("#### Polished subtitle")
+                st.code(st.session_state.ai_polished_srt, language="srt")
+                st.download_button("⬇️ Download polished SRT", st.session_state.ai_polished_srt, "polished_subtitle.srt", "application/x-subrip", key="download_polished_srt", use_container_width=True)
+            if st.session_state.get("ai_synopsis"):
+                st.markdown("#### AI synopsis")
+                st.info(st.session_state.ai_synopsis)
+            if st.session_state.get("ai_voice_suggestions"):
+                st.markdown("#### Suggested voice direction")
+                st.dataframe(st.session_state.ai_voice_suggestions, use_container_width=True, hide_index=True)
 
 with tab_srt_speech:
     st.header("SRT → Speech")
