@@ -162,6 +162,7 @@ def load_demo() -> None:
     st.session_state.lines = demo_lines()
     st.session_state.file_name = "demo-scene.srt"
     st.session_state.format = "srt"
+    st.session_state.generated_srt = export_subtitle(st.session_state.lines, "srt")
 
 
 def google_translate(texts: list[str], api_key: str, source: str, target: str) -> list[str]:
@@ -251,14 +252,17 @@ def main() -> None:
         if video:
             st.success(f"បាន upload: {video.name} · {video.size / 1024 / 1024:.1f} MB")
         st.markdown("### Generated SRT")
-        st.caption("You can edit the SRT here before generating audio:")
-        st.text_area("Generated SRT", placeholder="Generated subtitle text will appear here after connecting a transcription model…", height=210, label_visibility="collapsed")
+        st.caption("កែសម្រួល SRT បាន ហើយអាចទាញយកបានភ្លាមៗ។ Video transcription ពិតត្រូវភ្ជាប់ speech-to-text provider បន្ថែម។")
+        if "generated_srt" not in st.session_state:
+            st.session_state.generated_srt = export_subtitle(st.session_state.lines, "srt")
+        st.text_area("Generated SRT", height=210, label_visibility="collapsed", key="generated_srt")
         c1, c2 = st.columns(2)
         with c1:
-            st.write("")
+            if st.button("🧪 Prepare demo SRT", use_container_width=True):
+                st.session_state.generated_srt = export_subtitle(demo_lines(), "srt")
+                st.success("បានបង្កើត SRT demo ដែលអាចកែបាន។")
         with c2:
-            if st.button("🧠 Analyze Inner Thoughts", type="primary", use_container_width=True):
-                st.info("Video transcription UI is ready. Connect a speech-to-text model to generate timestamps automatically.")
+            st.download_button("⬇️ Download SRT", st.session_state.generated_srt, file_name="ai-khemra-generated.srt", mime="application/x-subrip", use_container_width=True)
         st.markdown("## 2️⃣ AI Dubbing (Edge TTS Studio)")
         if st.button("🎙️ Generate Dubbed Audio (MP3)", type="primary"):
             st.info("ភ្ជាប់ Edge TTS provider ដើម្បីបង្កើតសំឡេង dubbing ជា MP3។")
@@ -270,6 +274,13 @@ def main() -> None:
     with tabs[1]:
         st.markdown("## AI SRT Translator")
         st.caption("Upload subtitle → review original text → translate into Khmer → download.")
+        quick1, quick2 = st.columns(2)
+        with quick1:
+            if st.button("🧪 Load demo subtitle", use_container_width=True):
+                load_demo()
+                st.rerun()
+        with quick2:
+            st.info("Demo mode ready", icon="✅")
         uploaded = st.file_uploader("Upload .srt, .ass, or .vtt", type=["srt", "ass", "vtt"], key="subtitle_upload")
         if uploaded:
             fmt = Path(uploaded.name).suffix.lower().lstrip(".")
