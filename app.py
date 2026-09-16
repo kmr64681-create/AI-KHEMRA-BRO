@@ -56,6 +56,7 @@ st.markdown(
       .step-card p { color:#9eacc0; font-size:13px; margin:0; line-height:1.55; }
       .dark-panel { background:linear-gradient(140deg,#171e31,#111722); border:1px solid #263147; border-radius:18px; padding:22px; }
       .status-pill { border:1px solid #4b5a73; background:#172236; color:#c7d2e4; border-radius:999px; padding:5px 10px; font-size:11px; font-weight:700; }
+      .workflow-note { color:#a9b6cb; font-size:13px; line-height:1.6; margin:0 0 12px; }
       .stTabs [data-baseweb="tab-list"] { gap:8px; border-bottom:1px solid #29354a; }
       .stTabs [data-baseweb="tab"] { color:#9dacbf; padding:12px 16px; }
       .stTabs [aria-selected="true"] { color:var(--cyan); border-bottom-color:var(--cyan); }
@@ -80,7 +81,7 @@ st.markdown(
         .stTabs [data-baseweb="tab-highlight"] { display:none; }
         .stTabs [data-baseweb="tab-border"] { display:none; }
         .stHorizontalBlock { flex-wrap:wrap; }
-        .stHorizontalBlock > div { min-width: min(100%, 160px); }
+        .stHorizontalBlock > div { min-width: min(100%, 180px); }
         h2 { font-size:25px !important; line-height:1.15 !important; }
         .stButton > button, .stDownloadButton > button { min-height:38px; font-size:11px; }
       }
@@ -273,14 +274,8 @@ def main() -> None:
 
     with tabs[1]:
         st.markdown("## AI SRT Translator")
-        st.caption("Upload subtitle → review original text → translate into Khmer → download.")
-        quick1, quick2 = st.columns(2)
-        with quick1:
-            if st.button("🧪 Load demo subtitle", use_container_width=True):
-                load_demo()
-                st.rerun()
-        with quick2:
-            st.info("Demo mode ready", icon="✅")
+        st.markdown('<p class="workflow-note">Upload one subtitle file, translate it, review the result, then download. The controls are intentionally grouped to keep the workflow simple.</p>', unsafe_allow_html=True)
+        st.markdown("### 1 · Upload subtitle")
         uploaded = st.file_uploader("Upload .srt, .ass, or .vtt", type=["srt", "ass", "vtt"], key="subtitle_upload")
         if uploaded:
             fmt = Path(uploaded.name).suffix.lower().lstrip(".")
@@ -296,6 +291,12 @@ def main() -> None:
 
         lines = st.session_state.lines
         fmt = st.session_state.format
+        if not uploaded and st.session_state.file_name == "demo-scene.srt":
+            if st.button("🧪 Load demo subtitle", use_container_width=True):
+                load_demo()
+                st.rerun()
+
+        st.markdown("### 2 · Translation status")
         translated = sum(1 for line in lines if line["target"].strip())
         m1, m2, m3 = st.columns(3)
         m1.metric("Subtitle lines", len(lines))
@@ -304,8 +305,9 @@ def main() -> None:
         st.progress(translated / len(lines) if lines else 0)
         st.markdown(f'<span class="status-pill">{st.session_state.file_name}</span>', unsafe_allow_html=True)
 
-        c1, c2, c3, c4, c5 = st.columns(5)
-        with c1:
+        st.markdown("### 3 · Translate")
+        translate_col, line_col = st.columns([1.35, 1])
+        with translate_col:
             if st.button("✨ Translate whole story", type="primary", use_container_width=True):
                 try:
                     translated_text = google_translate([line["source"] for line in lines], google_api_key, google_source[0], google_target[0])
@@ -314,7 +316,7 @@ def main() -> None:
                     st.success(f"បានបកប្រែ {len(translated_text)} បន្ទាត់ដោយ Google Translate។")
                 except (ValueError, RuntimeError) as error:
                     st.error(str(error))
-        with c2:
+        with line_col:
             line_ids = [line["id"] for line in lines]
             selected_id = st.selectbox("Line", line_ids, format_func=lambda value: f"Line {value:02d}", label_visibility="collapsed")
             if st.button("Translate line", use_container_width=True):
@@ -324,25 +326,25 @@ def main() -> None:
                     st.success(f"Line {selected_id:02d} បានបកប្រែដោយ Google Translate។")
                 except (ValueError, RuntimeError) as error:
                     st.error(str(error))
-        with c3:
-            export = export_subtitle(lines, fmt)
-            st.download_button("⬇️ Download", export, file_name=f"{Path(st.session_state.file_name).stem}-kh.{fmt}", mime="text/plain", use_container_width=True)
-        with c4:
-            if st.button("↺ Reset", use_container_width=True):
-                load_demo()
-                st.rerun()
-        with c5:
-            if st.button("⌫ Clear", use_container_width=True):
-                for line in lines:
-                    line["target"] = ""
-                st.success("បានលុបការបកប្រែខ្មែរទាំងអស់។")
 
-        st.markdown("### Review and edit Khmer translation")
+        st.markdown("### 4 · Review and download")
         for index, line in enumerate(lines):
             with st.container(border=True):
                 st.caption(f"#{line['id']:02d} · {line['start']} → {line['end']}")
                 st.write(line["source"])
                 line["target"] = st.text_area("Khmer", value=line["target"], key=f"target_{index}", placeholder="បញ្ចូលការបកប្រែខ្មែរ…", label_visibility="collapsed")
+        export = export_subtitle(lines, fmt)
+        st.download_button("⬇️ Download translated subtitle", export, file_name=f"{Path(st.session_state.file_name).stem}-kh.{fmt}", mime="text/plain", use_container_width=True)
+        reset_col, clear_col = st.columns(2)
+        with reset_col:
+            if st.button("↺ Reset to demo", use_container_width=True):
+                load_demo()
+                st.rerun()
+        with clear_col:
+            if st.button("⌫ Clear translations", use_container_width=True):
+                for line in lines:
+                    line["target"] = ""
+                st.rerun()
 
     with tabs[2]:
         st.markdown("## Subtitle to Speech")
