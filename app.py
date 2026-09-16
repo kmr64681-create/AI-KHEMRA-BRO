@@ -1,6 +1,9 @@
 import re
 import json
 import os
+import base64
+import io
+import wave
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -263,6 +266,69 @@ def translate_with_provider(texts: list[str], provider: str, google_key: str, ge
     return google_translate(texts, google_key, source, target)
 
 
+def gemini_request(payload: dict, api_key: str, model: str) -> dict:
+    if not api_key.strip():
+        raise ValueError("សូមបញ្ចូល Google AI Studio (Gemini) API key ជាមុនសិន។")
+    request = urllib.request.Request(
+        f"https://generativelanguage.googleapis.com/v1beta/models/{urllib.parse.quote(model)}:generateContent?key={urllib.parse.quote(api_key.strip())}",
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=90) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        try:
+            detail = json.loads(error.read().decode("utf-8")).get("error", {}).get("message", "Request rejected")
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            detail = "Request rejected"
+        raise RuntimeError(f"Google Gemini API: {detail}") from error
+    except urllib.error.URLError as error:
+        raise RuntimeError("មិនអាចភ្ជាប់ Google Gemini API បានទេ។") from error
+
+
+def gemini_text_result(result: dict) -> str:
+    try:
+        return result["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except (KeyError, IndexError, TypeError) as error:
+        raise RuntimeError("Gemini មិនបានផ្ញើអត្ថបទត្រឡប់មកទេ។") from error
+
+
+def gemini_video_to_srt(video_bytes: bytes, mime_type: str, api_key: str, model: str) -> str:
+    prompt = """Transcribe the spoken dialogue in this video into an SRT subtitle file. Detect the spoken language. Use accurate timestamps, one cue per utterance, and preserve the original spoken words. Return only valid SRT text, with no markdown fences or explanation."""
+    payload = {"contents": [{"parts": [{"text": prompt}, {"inline_data": {"mime_type": mime_type, "data": base64.b64encode(video_bytes).decode()}}]}], "generationConfig": {"temperature": 0.1}}
+    srt = gemini_text_result(gemini_request(payload, api_key, model))
+    return re.sub(r"^```(?:srt|text)?\s*|\s*```$", "", srt, flags=re.I).strip() + "\n"
+
+
+def pcm_to_wav(audio_bytes: bytes, mime_type: str) -> bytes:
+    """Wrap raw Gemini PCM output as a browser-playable WAV file."""
+    rate_match = re.search(r"rate=(\d+)", mime_type or "")
+    sample_rate = int(rate_match.group(1)) if rate_match else 24000
+    channels = 2 if "stereo" in (mime_type or "").lower() else 1
+    output = io.BytesIO()
+    with wave.open(output, "wb") as wav_file:
+        wav_file.setnchannels(channels)
+        wav_file.setsampwidth(2)
+        wav_file.setframerate(sample_rate)
+        wav_file.writeframes(audio_bytes)
+    return output.getvalue()
+
+
+def gemini_text_to_wav(text: str, api_key: str, model: str, voice: str) -> bytes:
+    if not text.strip():
+        raise ValueError("សូមបញ្ចូលអត្ថបទមុនបង្កើតសំឡេង។")
+    payload = {"contents": [{"parts": [{"text": text.strip()}]}], "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice}}}}}
+    result = gemini_request(payload, api_key, model)
+    try:
+        part = next(part for part in result["candidates"][0]["content"]["parts"] if "inlineData" in part)
+        inline = part["inlineData"]
+        return pcm_to_wav(base64.b64decode(inline["data"]), inline.get("mimeType", "audio/pcm;rate=24000"))
+    except (KeyError, IndexError, StopIteration, TypeError, ValueError) as error:
+        raise RuntimeError("Gemini មិនបានផ្ញើ audio ត្រឡប់មកទេ។ សូមជ្រើស TTS model ដែលគាំទ្រ។") from error
+
+
 def main() -> None:
     if "lines" not in st.session_state:
         load_demo()
@@ -317,6 +383,7 @@ def main() -> None:
         video = st.file_uploader("Upload Video", type=["mp4", "mov", "avi", "mkv"], key="video_upload")
         if video:
             st.success(f"បាន upload: {video.name} · {video.size / 1024 / 1024:.1f} MB")
+        st.caption("Upload a short video, then Gemini will detect speech and create timestamps.")
         st.markdown("### Generated SRT")
         st.caption("កែសម្រួល SRT បាន ហើយអាចទាញយកបានភ្លាមៗ។ Video transcription ពិតត្រូវភ្ជាប់ speech-to-text provider បន្ថែម។")
         if "generated_srt" not in st.session_state:
@@ -324,9 +391,15 @@ def main() -> None:
         st.text_area("Generated SRT", height=210, label_visibility="collapsed", key="generated_srt")
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("🧪 Prepare demo SRT", use_container_width=True):
-                st.session_state.generated_srt = export_subtitle(demo_lines(), "srt")
-                st.success("បានបង្កើត SRT demo ដែលអាចកែបាន។")
+            if st.button("🧠 Transcribe video with Gemini", type="primary", use_container_width=True):
+                if not video:
+                    st.warning("សូម upload video ជាមុនសិន។")
+                else:
+                    try:
+                        st.session_state.generated_srt = gemini_video_to_srt(video.getvalue(), video.type or "video/mp4", gemini_api_key, gemini_model)
+                        st.success("បានបង្កើត SRT ពីវីដេអូរួចរាល់។")
+                    except (ValueError, RuntimeError) as error:
+                        st.error(str(error))
         with c2:
             st.download_button("⬇️ Download SRT", st.session_state.generated_srt, file_name="ai-khemra-generated.srt", mime="application/x-subrip", use_container_width=True)
         st.markdown("## 2️⃣ AI Dubbing (Edge TTS Studio)")
@@ -413,22 +486,35 @@ def main() -> None:
 
     with tabs[2]:
         st.markdown("## Subtitle to Speech")
-        st.caption("បម្លែង subtitle ដែលបានបកប្រែទៅជាសំឡេងខ្មែរ។")
-        st.text_area("SRT text", value=export_subtitle(st.session_state.lines, st.session_state.format), height=200)
-        voice = st.selectbox("Voice", ["Khmer Female 01", "Khmer Male 01", "Khmer Neutral"], key="subtitle_speech_voice")
-        if st.button("🎙️ Generate Khmer Audio", type="primary"):
-            st.info(f"Voice {voice} ត្រូវបានជ្រើសរើស។ ភ្ជាប់ TTS provider ដើម្បីបង្កើត MP3/WAV។")
+        st.caption("បម្លែង subtitle ទៅជាសំឡេង WAV ដោយ Gemini TTS។")
+        speech_text = "\n".join(line["target"] or line["source"] for line in st.session_state.lines)
+        st.text_area("Subtitle text", value=speech_text, height=180, key="subtitle_speech_text")
+        voice = st.selectbox("Voice", ["Kore", "Aoede", "Puck", "Charon"], key="subtitle_speech_voice")
+        tts_model = st.selectbox("TTS model", ["gemini-2.5-flash-preview-tts", "gemini-2.5-pro-preview-tts"], key="subtitle_tts_model")
+        if st.button("🎙️ Generate Khmer Audio", type="primary", use_container_width=True):
+            try:
+                audio = gemini_text_to_wav(st.session_state.subtitle_speech_text, gemini_api_key, tts_model, voice)
+                st.audio(audio, format="audio/wav")
+                st.download_button("⬇️ Download WAV", audio, file_name="ai-khemra-subtitle.wav", mime="audio/wav", use_container_width=True)
+            except (ValueError, RuntimeError) as error:
+                st.error(str(error))
 
     with tabs[3]:
         st.markdown("## Text-to-Speech")
-        st.text_area("Text to speak", placeholder="សរសេរអត្ថបទខ្មែរនៅទីនេះ…", height=190)
+        st.caption("សរសេរអត្ថបទ ហើយបង្កើតសំឡេង WAV ដោយ Gemini TTS។")
+        st.text_area("Text to speak", placeholder="សរសេរអត្ថបទខ្មែរនៅទីនេះ…", height=190, key="tts_text")
         c1, c2 = st.columns(2)
         with c1:
-            st.selectbox("Voice", ["Khmer Female 01", "Khmer Male 01", "Khmer Neutral"], key="tts_voice")
+            st.selectbox("Voice", ["Kore", "Aoede", "Puck", "Charon"], key="tts_voice")
         with c2:
-            st.slider("Speed", 0.7, 1.3, 1.0, 0.05)
+            st.selectbox("TTS model", ["gemini-2.5-flash-preview-tts", "gemini-2.5-pro-preview-tts"], key="tts_model")
         if st.button("🔊 Generate speech", type="primary", use_container_width=True):
-            st.info("Text-to-Speech UI ត្រូវបានរៀបចំរួច។ ភ្ជាប់ speech provider ដើម្បីទទួលបាន audio file។")
+            try:
+                audio = gemini_text_to_wav(st.session_state.tts_text, gemini_api_key, st.session_state.tts_model, st.session_state.tts_voice)
+                st.audio(audio, format="audio/wav")
+                st.download_button("⬇️ Download WAV", audio, file_name="ai-khemra-speech.wav", mime="audio/wav", use_container_width=True)
+            except (ValueError, RuntimeError) as error:
+                st.error(str(error))
 
 
 if __name__ == "__main__":
