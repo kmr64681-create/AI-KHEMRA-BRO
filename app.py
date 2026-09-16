@@ -595,6 +595,53 @@ button, a, [role="button"]{touch-action:manipulation}
   button[data-baseweb="tab"]{min-height:44px!important}
   .stButton > button, .stDownloadButton > button{min-height:44px!important}
 }
+
+/* ───────────── Aurora Studio visual refresh ───────────── */
+:root{
+  --bg:#07111f;--panel:#0e1b2f;--panel-soft:#12243d;--line:#23415c;
+  --cyan:#67e8f9;--blue:#38bdf8;--violet:#a78bfa;--green:#86efac;
+}
+.stApp{background:
+  radial-gradient(circle at 12% 0%,rgba(56,189,248,.15),transparent 30%),
+  radial-gradient(circle at 92% 10%,rgba(167,139,250,.12),transparent 27%),
+  linear-gradient(145deg,#07111f 0%,#091525 52%,#0b1220 100%)!important;
+}
+.block-container{max-width:1240px!important;padding-top:.75rem!important}
+.hero{
+  position:relative;overflow:hidden;border:1px solid rgba(103,232,249,.55)!important;
+  border-radius:26px!important;padding:38px 22px 32px!important;
+  background:linear-gradient(135deg,rgba(14,27,47,.96),rgba(15,23,42,.82))!important;
+  box-shadow:0 20px 60px rgba(2,132,199,.16),inset 0 1px rgba(255,255,255,.07)!important;
+}
+.hero:before{content:'';position:absolute;width:210px;height:210px;right:-68px;top:-80px;border-radius:50%;background:rgba(103,232,249,.13);filter:blur(2px)}
+.hero:after{content:'AI DUBBING STUDIO';position:absolute;right:22px;bottom:14px;color:rgba(165,243,252,.36);font-size:10px;font-weight:900;letter-spacing:2px}
+.hero h1{position:relative;font-size:clamp(32px,5vw,52px)!important;letter-spacing:-1.8px!important;text-shadow:0 0 28px rgba(103,232,249,.2)}
+.hero p{position:relative;color:#8be9f7!important;font-size:12px;letter-spacing:2.4px!important}
+.studio-strip{position:relative;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:19px}
+.studio-strip span{padding:7px 11px;border:1px solid rgba(103,232,249,.24);border-radius:999px;background:rgba(7,17,31,.36);color:#c9f7ff;font-size:11px;font-weight:800;letter-spacing:.2px}
+.section-title{font-size:clamp(24px,3vw,32px)!important;margin:26px 0 13px!important;color:#f8fafc;letter-spacing:-.7px}
+.stTabs{margin-top:18px}
+div[data-baseweb="tab-list"]{background:rgba(14,27,47,.78)!important;border-color:rgba(103,232,249,.2)!important;box-shadow:0 12px 34px rgba(0,0,0,.16)}
+button[data-baseweb="tab"]{background:rgba(18,36,61,.72)!important;border-color:rgba(148,163,184,.18)!important;transition:all .18s ease!important}
+button[data-baseweb="tab"]:hover{border-color:rgba(103,232,249,.65)!important;color:#e0fbff!important;transform:translateY(-1px)}
+button[data-baseweb="tab"][aria-selected="true"]{background:linear-gradient(135deg,#0ea5e9,#6366f1)!important;box-shadow:0 9px 24px rgba(14,165,233,.24)!important}
+[data-testid="stMetric"]{background:linear-gradient(145deg,rgba(18,36,61,.88),rgba(14,27,47,.75));border:1px solid rgba(103,232,249,.16);border-radius:16px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.13)}
+[data-testid="stMetricLabel"]{color:#9db3ca!important;font-weight:700}
+[data-testid="stMetricValue"]{color:#e8fbff!important}
+div[data-testid="stFileUploaderDropzone"]{border-color:rgba(103,232,249,.55)!important;background:linear-gradient(145deg,rgba(18,36,61,.92),rgba(10,25,43,.88))!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 10px 28px rgba(0,0,0,.12)}
+div[data-testid="stTextArea"] textarea, div[data-testid="stTextInput"] input{background:rgba(10,25,43,.9)!important;border-color:rgba(148,163,184,.35)!important;box-shadow:inset 0 1px rgba(255,255,255,.035)}
+.stButton>button,.stDownloadButton>button{box-shadow:0 8px 22px rgba(14,165,233,.16)!important;transition:transform .18s ease,filter .18s ease!important}
+.stButton>button:hover,.stDownloadButton>button:hover{transform:translateY(-2px)!important}
+.khemra-wait-card{background:linear-gradient(135deg,rgba(14,165,233,.18),rgba(18,36,61,.92))!important;border-color:rgba(103,232,249,.4)!important}
+@media(max-width:700px){
+  .hero{padding:29px 15px 25px!important;margin-top:40px!important}
+  .hero:after{right:14px;bottom:10px;font-size:8px;letter-spacing:1.2px}
+  .hero h1{letter-spacing:-1px!important}
+  .studio-strip{gap:5px;margin-top:15px}
+  .studio-strip span{font-size:10px;padding:6px 8px}
+  .section-title{margin-top:19px!important}
+  [data-testid="stMetric"]{padding:9px 10px;border-radius:13px}
+}
 </style>
 ''', unsafe_allow_html=True)
 
@@ -3923,7 +3970,8 @@ if not valid_api_keys:
     st.warning(f"🔐 មិនទាន់មាន Gemini API Key — សូមបញ្ចូលក្នុង ☰ Settings ដើម្បីបកប្រែអក្សរទៅជា {target_language_name}។")
 
 st.markdown(
-    '<div class="hero"><h1>AI KHEMRA BRO</h1><p>GLOBAL AI DUBBING & SUBTITLING WORKSTATION</p></div>',
+    '<div class="hero"><h1>AI KHEMRA BRO</h1><p>GLOBAL AI DUBBING & SUBTITLING WORKSTATION</p>'
+    '<div class="studio-strip"><span>✦ Khmer-first AI</span><span>◉ 4 creative tools</span><span>↗ Export-ready</span></div></div>',
     unsafe_allow_html=True,
 )
 
